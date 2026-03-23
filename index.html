@@ -44,8 +44,11 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--te
 .nav-item.active .icon{opacity:1}
 .sidebar-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
 .gs-status{display:flex;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.4)}
-.gs-dot{width:7px;height:7px;border-radius:50%;background:#636e72;flex-shrink:0}
+.gs-dot{width:7px;height:7px;border-radius:50%;background:#636e72;flex-shrink:0;transition:background .3s}
 .gs-dot.connected{background:var(--green)}
+.gs-dot.error{background:var(--red)}
+.gs-dot.syncing{background:var(--accent);animation:pulse-dot .8s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
 /* ── MAIN ── */
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
@@ -194,15 +197,12 @@ select.form-control{cursor:pointer}
 .btn-pdf:hover{background:#c0392b}
 /* ── PRINT STYLES ── */
 @media print {
-  .sidebar,.topbar,.phieu-actions,.btn,nav,
-  .card:not(.phieu-print-card){display:none!important}
-  .main{margin-left:0!important}
-  .content{padding:0!important}
-  body{background:#fff!important}
-  .phieu-print-card{box-shadow:none!important;border:none!important;border-radius:0!important}
-  @page{margin:8mm 10mm;size:A4 portrait}
-  #page-xuat-kho,#phieu-preview,#phieu-preview>div{display:block!important}
-  #phieu-preview>div{-webkit-print-color-adjust:exact;print-color-adjust:exact;max-width:100%!important}
+  /* Ẩn tất cả ngoại trừ phiếu */
+  body > *,
+  .sidebar, .main, .topbar, .app { display:none!important }
+  /* Chỉ hiện #print-frame */
+  #print-frame { display:block!important; position:fixed; inset:0; }
+  @page { margin:8mm 10mm; size:A4 portrait; }
 }
 
 /* ── MODAL ── */
@@ -255,6 +255,7 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
 </head>
 <body>
 <div id="toast-container"></div>
+<div id="print-frame" style="display:none"></div>
 
 <div class="app">
 <!-- ══ SIDEBAR ══ -->
@@ -296,6 +297,10 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
     <div class="gs-status">
       <div class="gs-dot" id="gs-dot"></div>
       <span id="gs-status-text">Chưa kết nối</span>
+    </div>
+    <div style="font-size:9px;color:rgba(255,255,255,.2);margin-top:4px;display:flex;align-items:center;gap:4px">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="gs-sync-ts">—</span>
     </div>
   </div>
 </nav>
@@ -368,15 +373,15 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
             </div>
             <div class="form-group">
               <label class="form-label">Giá dệt (₫/kg)</label>
-              <input type="number" class="form-control" id="nvm-gia-det" placeholder="7000" min="0">
+              <input type="number" class="form-control" id="nvm-gia-det" placeholder="7000" min="0" onkeydown="blockNonNumeric(event,false)">
             </div>
             <div class="form-group">
               <label class="form-label">Loại máy dệt</label>
-              <input type="number" class="form-control" id="nvm-may" placeholder="3020">
+              <input type="number" class="form-control" id="nvm-may" placeholder="3020" onkeydown="blockNonNumeric(event,false)">
             </div>
             <div class="form-group">
               <label class="form-label">Trọng lượng mộc (g/m²)</label>
-              <input type="number" class="form-control" id="nvm-tlmoc" placeholder="400">
+              <input type="number" class="form-control" id="nvm-tlmoc" placeholder="400" onkeydown="blockNonNumeric(event,false)">
             </div>
             <div class="form-group">
               <label class="form-label">Xe vận chuyển</label>
@@ -524,7 +529,7 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
             </div>
             <div class="form-group">
               <label class="form-label">Giá nhuộm (₫/kg) <span>*</span></label>
-              <input type="number" class="form-control" id="vtp-gia-nhuom" placeholder="9000" oninput="updateVtpSummary()">
+              <input type="number" class="form-control" id="vtp-gia-nhuom" placeholder="9000" oninput="updateVtpSummary()" onkeydown="blockNonNumeric(event,false)">
             </div>
             <div class="form-group">
               <label class="form-label">Xe vận chuyển</label>
@@ -682,7 +687,7 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
             <div class="form-group">
               <label class="form-label">Đơn giá (₫/kg)</label>
               <input type="number" class="form-control" id="xk-item-gia" placeholder="72000"
-                oninput="onItemGiaChange()">
+                oninput="onItemGiaChange()" onkeydown="blockNonNumeric(event,false)">
             </div>
             <!-- Hiển thị thông tin hàng hóa từ HANG_DATA -->
             <div class="form-group" style="grid-column:1/-1">
@@ -782,7 +787,7 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
           </div>
           <div class="form-group">
             <label class="form-label">Số tiền thu (₫) <span>*</span></label>
-            <input type="number" class="form-control" id="tt-so-tien" placeholder="0" oninput="updateTtRemaining()">
+            <input type="number" class="form-control" id="tt-so-tien" placeholder="0" oninput="updateTtRemaining()" onkeydown="blockNonNumeric(event,false)">
           </div>
           <div class="form-group">
             <label class="form-label">Hình thức thanh toán</label>
@@ -922,6 +927,30 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
         </div>
 
         <div id="conn-result" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+        <div id="sync-status-panel" style="display:none;margin-top:10px;background:var(--bg);border-radius:8px;padding:12px 14px">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px">📡 Realtime Sync</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+            <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+              <div style="color:var(--muted);margin-bottom:3px">Trạng thái</div>
+              <div id="sync-state-badge" style="font-weight:600;color:var(--green)">—</div>
+            </div>
+            <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+              <div style="color:var(--muted);margin-bottom:3px">Đồng bộ lần cuối</div>
+              <div id="sync-last-time" style="font-family:'JetBrains Mono',monospace;font-weight:600">—</div>
+            </div>
+            <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+              <div style="color:var(--muted);margin-bottom:3px">Khách hàng</div>
+              <div id="sync-kh-count" style="font-weight:600;color:var(--navy)">—</div>
+            </div>
+            <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+              <div style="color:var(--muted);margin-bottom:3px">Polling</div>
+              <div style="font-weight:600;color:var(--navy)">Mỗi 30 giây</div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="syncFromSheets()" style="margin-top:10px;width:100%;justify-content:center">
+            🔄 Đồng bộ ngay
+          </button>
+        </div>
       </div>
     </div>
 
@@ -947,67 +976,107 @@ code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-
       </div>
       <div class="card-body" style="padding:0">
         <pre id="gas-code" style="background:#0f2744;color:#a8d8ff;padding:20px;border-radius:0 0 10px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;margin:0">// ================================================================
-// VĨNH PHÁT — Google Apps Script
-// Copy TOÀN BỘ file này vào Apps Script editor
+// VĨNH PHÁT — Google Apps Script v2 (Realtime Sync)
 // ================================================================
 
-const SHEET_NAMES = {
+var SHEET_NAMES = {
   nhapVaiMoc:   'Nhập vải mộc',
   vaiThanhPham: 'Vải thành phẩm',
   phieuXuatKho: 'Phiếu xuất kho',
   noKhach:      'Nợ khách',
+  noNhuom:      'Nợ nhuộm',
+  noDet:        'Nợ dệt',
   danhMucKH:    'Danh mục khách hàng',
+  danhMucNCC:   'Danh mục nhà cung cấp',
+  danhMucVai:   'Định mức',
 };
 
-// ── Entry points ──────────────────────────────────────────────
-
-function doGet(e) {
-  return json({ ok: true, msg: 'Vĩnh Phát API sẵn sàng ✓' });
-}
-
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  lock.tryLock(15000);
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const ss   = SpreadsheetApp.getActiveSpreadsheet();
-    let result;
-    if      (data.action === 'nhapVaiMoc')   result = handleNhapVaiMoc(ss, data);
-    else if (data.action === 'vaiThanhPham') result = handleVaiTP(ss, data);
-    else if (data.action === 'xuatKho')      result = handleXuatKho(ss, data);
-    else if (data.action === 'thuTien')      result = handleThuTien(ss, data);
-    else if (data.action === 'themKH')       result = handleThemKH(ss, data);
-    else                                     result = { ok: false, msg: 'Action không hợp lệ: ' + data.action };
-    return json(result);
-  } catch (err) {
-    return json({ ok: false, msg: err.message });
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-// ── Helper: trả JSON response ─────────────────────────────────
-
+// ── JSON response helper ──────────────────────────────────────
+// Lưu ý: Apps Script không hỗ trợ setHeader() trên TextOutput
+// CORS được xử lý tự động khi deploy với "Who has access: Anyone"
 function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// ── Helper: lấy số thứ tự tiếp theo từ cột ID ────────────────
+// ── doGet: đọc dữ liệu từ Sheets ─────────────────────────────
+function doGet(e) {
+  // Guard: e có thể undefined khi test trong editor
+  var action = 'ping';
+  try {
+    if (e &amp;&amp; e.parameter &amp;&amp; e.parameter.action) {
+      action = e.parameter.action;
+    }
+  } catch(ignore) {}
 
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    switch (action) {
+      case 'ping':
+        return json({ ok: true, msg: 'Vĩnh Phát API v2 ✓', ts: Date.now() });
+      case 'getKH':
+        return json({ ok: true, data: getKhachHang(ss) });
+      case 'getNCC':
+        return json({ ok: true, data: getNCC(ss) });
+      case 'getNoKhach':
+        return json({ ok: true, data: getNoKhach(ss) });
+      case 'getTonKho':
+        return json({ ok: true, data: getTonKho(ss) });
+      case 'getSeq':
+        return json({ ok: true, data: getAllSeq(ss) });
+      case 'getAll':
+        return json({
+          ok:         true,
+          ts:         Date.now(),
+          khachHang:  getKhachHang(ss),
+          ncc:        getNCC(ss),
+          noKhach:    getNoKhach(ss),
+          tonKho:     getTonKho(ss),
+          seq:        getAllSeq(ss),
+        });
+      default:
+        return json({ ok: false, msg: 'Unknown action: ' + action });
+    }
+  } catch(err) {
+    return json({ ok: false, msg: 'doGet error: ' + err.message });
+  }
+}
+
+// ── doPost: ghi dữ liệu vào Sheets ───────────────────────────
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(15000);
+  try {
+    if (!e || !e.postData) return json({ ok: false, msg: 'No POST data received' });
+    var data = JSON.parse(e.postData.contents);
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var result;
+    switch (data.action) {
+      case 'nhapVaiMoc':   result = handleNhapVaiMoc(ss, data);  break;
+      case 'vaiThanhPham': result = handleVaiTP(ss, data);       break;
+      case 'xuatKho':      result = handleXuatKho(ss, data);     break;
+      case 'thuTien':      result = handleThuTien(ss, data);     break;
+      case 'themKH':       result = handleThemKH(ss, data);      break;
+      default: result = { ok: false, msg: 'Unknown action: ' + data.action };
+    }
+    return json(result);
+  } catch(err) {
+    return json({ ok: false, msg: err.message });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
 function nextSeq(ws) {
   var last = ws.getLastRow();
   if (last &lt; 2) return 1;
   var vals = ws.getRange(2, 1, last - 1, 1).getValues();
-  var max  = 0;
+  var max = 0;
   for (var i = 0; i &lt; vals.length; i++) {
-    var v = String(vals[i][0]);
-    var m = v.match(/(\d+)$/);
-    if (m) {
-      var n = parseInt(m[1], 10);
-      if (n &gt; max) max = n;
-    }
+    var m = String(vals[i][0]).match(/(\d+)$/);
+    if (m) { var n = parseInt(m[1], 10); if (n &gt; max) max = n; }
   }
   return max + 1;
 }
@@ -1018,261 +1087,155 @@ function pad(n, len) {
   return s;
 }
 
-// ── Handler: Nhập vải mộc ─────────────────────────────────────
-// Ghi 1 dòng lô + các cây kg vào cột C-1, C-2...
-// Columns: ID | Ngày | Nhà dệt | Nhà nhuộm | Tên SP | Máy dệt |
-//          TL mộc | Xe | Nợ dệt | Giá dệt | Tổng cân | Tổng cây |
-//          C-1 | C-2 | ... C-N
+function sheetRows(ss, name) {
+  var ws = ss.getSheetByName(name);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  return ws.getRange(2, 1, ws.getLastRow() - 1, ws.getLastColumn()).getValues();
+}
 
+// ── GET handlers ─────────────────────────────────────────────
+function getKhachHang(ss) {
+  var rows = sheetRows(ss, SHEET_NAMES.danhMucKH);
+  return rows
+    .filter(function(r) { return r[0] &amp;&amp; r[2]; })
+    .map(function(r) {
+      return { id: r[0], ten: r[2], phuTrach: r[3] || '' };
+    });
+}
+
+function getNCC(ss) {
+  var rows = sheetRows(ss, SHEET_NAMES.danhMucNCC);
+  return rows
+    .filter(function(r) { return r[0] &amp;&amp; r[2]; })
+    .map(function(r) {
+      return { id: r[0], loai: r[1] || '', ten: r[2] };
+    });
+}
+
+function getNoKhach(ss) {
+  var ws = ss.getSheetByName(SHEET_NAMES.noKhach);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  var data = ws.getDataRange().getValues();
+  var result = [];
+  // Tìm header row
+  var tenCol = 2, tongCol = 5, daTTCol = 7;
+  for (var i = 1; i &lt; data.length; i++) {
+    var ten = String(data[i][tenCol] || '').trim();
+    if (!ten) continue;
+    var tong = parseFloat(data[i][tongCol]) || 0;
+    var daTT = parseFloat(data[i][daTTCol]) || 0;
+    result.push({ ten: ten, tongNo: tong, daTT: daTT, conNo: tong - daTT });
+  }
+  return result;
+}
+
+function getTonKho(ss) {
+  var ws = ss.getSheetByName(SHEET_NAMES.nhapVaiMoc);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  // Đọc cột: ID, tenHang, tongCay, tongCan
+  var rows = ws.getRange(2, 1, ws.getLastRow() - 1, 12).getValues();
+  var result = [];
+  rows.forEach(function(r) {
+    if (r[0]) result.push({ lotId: r[0], tenHang: r[4] || '', tongCay: r[11] || 0, tongCan: r[10] || 0 });
+  });
+  return result;
+}
+
+function getAllSeq(ss) {
+  var seqs = {};
+  [
+    ['pxk', SHEET_NAMES.phieuXuatKho],
+    ['nvm', SHEET_NAMES.nhapVaiMoc],
+    ['vtp', SHEET_NAMES.vaiThanhPham],
+    ['kh',  SHEET_NAMES.danhMucKH],
+  ].forEach(function(pair) {
+    var ws = ss.getSheetByName(pair[1]);
+    seqs[pair[0]] = ws ? nextSeq(ws) : 1;
+  });
+  return seqs;
+}
+
+// ── POST handlers ─────────────────────────────────────────────
 function handleNhapVaiMoc(ss, d) {
   var ws  = ss.getSheetByName(SHEET_NAMES.nhapVaiMoc);
   var seq = nextSeq(ws);
   var yr  = new Date().getFullYear();
   var lotId = 'NVM-' + yr + '-' + pad(seq, 3);
-
-  var kgs      = d.kgs || [];
-  var tongCan  = 0;
+  var kgs = d.kgs || [];
+  var tongCan = 0;
   for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
   tongCan = Math.round(tongCan * 100) / 100;
-
-  var giaDet  = parseFloat(d.giaDet) || 0;
-  var noDet   = Math.round(giaDet * tongCan);
-  var tongCay = kgs.length;
-
-  // Build row: fixed cols (12) + kg per roll
-  var row = [
-    lotId,
-    d.ngay,
-    d.nhaDet   || '',
-    d.nhaNhuom || '',
-    d.tenHang  || '',
-    d.loaiMay  || '',
-    d.tlMoc    || '',
-    d.xe       || '',
-    noDet,
-    giaDet,
-    tongCan,
-    tongCay
-  ];
-  for (var j = 0; j &lt; kgs.length; j++) {
-    row.push(parseFloat(kgs[j]) || 0);
-  }
-
+  var giaDet = parseFloat(d.giaDet) || 0;
+  var row = [lotId, d.ngay||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'',
+             d.loaiMay||'', d.tlMoc||'', d.xe||'',
+             Math.round(giaDet*tongCan), giaDet, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
   ws.appendRow(row);
-
-  return {
-    ok:      true,
-    lotId:   lotId,
-    tongCay: tongCay,
-    tongCan: tongCan,
-    noDet:   noDet
-  };
+  return { ok: true, lotId: lotId, tongCay: kgs.length, tongCan: tongCan };
 }
-
-// ── Handler: Vải thành phẩm ───────────────────────────────────
-// Columns: ID | Ngày | Nhà dệt | Nhà nhuộm | Tên hàng | Xe |
-//          Nợ nhuộm | Giá nhuộm | Tổng cân | Tổng cây |
-//          C-1 | C-2 | ... C-N
 
 function handleVaiTP(ss, d) {
   var ws  = ss.getSheetByName(SHEET_NAMES.vaiThanhPham);
   var seq = nextSeq(ws);
   var yr  = new Date().getFullYear();
   var id  = 'NVTP-' + yr + '-' + pad(seq, 3);
-
-  var kgs     = d.kgs || [];
+  var kgs = d.kgs || [];
   var tongCan = 0;
   for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
   tongCan = Math.round(tongCan * 100) / 100;
-
   var giaNhuom = parseFloat(d.giaNhuom) || 0;
-  var noNhuom  = Math.round(giaNhuom * tongCan);
-  var tongCay  = kgs.length;
-
-  var row = [
-    id,
-    d.ngay,
-    d.nhaDet   || '',
-    d.nhaNhuom || '',
-    d.tenHang  || '',
-    d.xe       || '',
-    noNhuom,
-    giaNhuom,
-    tongCan,
-    tongCay
-  ];
-  for (var j = 0; j &lt; kgs.length; j++) {
-    row.push(parseFloat(kgs[j]) || 0);
-  }
-
+  var row = [id, d.ngay||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'', d.xe||'',
+             Math.round(giaNhuom*tongCan), giaNhuom, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
   ws.appendRow(row);
-
-  return {
-    ok:      true,
-    id:      id,
-    tongCay: tongCay,
-    tongCan: tongCan,
-    noNhuom: noNhuom
-  };
+  return { ok: true, id: id, tongCay: kgs.length, tongCan: tongCan };
 }
-
-// ── Handler: Xuất kho ─────────────────────────────────────────
-// Columns: ID | Ngày | Hành động | Tên KH | Tên hàng | Xe |
-//          Thanh toán | Giá bán (tổng) | Đơn giá | Tổng cân |
-//          Tổng cây | C-1 | C-2 | ... C-N
 
 function handleXuatKho(ss, d) {
   var ws  = ss.getSheetByName(SHEET_NAMES.phieuXuatKho);
   var seq = nextSeq(ws);
   var id  = 'PXK-VTP-' + pad(seq, 3);
-
-  var kgs     = d.kgs || [];
+  var kgs = d.kgs || [];
   var tongCan = 0;
   for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
   tongCan = Math.round(tongCan * 100) / 100;
-
-  var donGia   = parseFloat(d.donGia) || 0;
-  var tongTien = Math.round(donGia * tongCan);
-  var tongCay  = kgs.length;
-
-  var row = [
-    id,
-    d.ngay,
-    'Xuất kho',
-    d.khachHang || '',
-    d.tenHang   || '',
-    d.xe        || '',
-    d.trangThai || 'Chưa thanh toán',
-    tongTien,
-    donGia,
-    tongCan,
-    tongCay
-  ];
-  for (var j = 0; j &lt; kgs.length; j++) {
-    row.push(parseFloat(kgs[j]) || 0);
-  }
-
+  var donGia = parseFloat(d.donGia) || 0;
+  var row = [id, d.ngay||'', 'Xuat kho', d.khachHang||'', d.tenHang||'', d.xe||'',
+             d.trangThai||'Chua thanh toan', Math.round(donGia*tongCan), donGia, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
   ws.appendRow(row);
-
-  return {
-    ok:       true,
-    id:       id,
-    tongTien: tongTien,
-    tongCay:  tongCay,
-    tongCan:  tongCan
-  };
+  return { ok: true, id: id, tongTien: Math.round(donGia*tongCan), tongCay: kgs.length, tongCan: tongCan };
 }
-
-// ── Handler: Thu tiền ─────────────────────────────────────────
-// Tìm dòng khách hàng trong sheet Nợ khách, cộng thêm số tiền
-// vào cột "Đã thanh toán" (cột H = index 7, 0-based)
 
 function handleThuTien(ss, d) {
   var ws   = ss.getSheetByName(SHEET_NAMES.noKhach);
   var last = ws.getLastRow();
-
-  if (last &lt; 3) {
-    return { ok: false, msg: 'Sheet Nợ khách chưa có dữ liệu' };
-  }
-
-  // Đọc toàn bộ dữ liệu (bỏ qua row 1 = banner, row 2 = header)
-  var allData = ws.getRange(1, 1, last, ws.getLastColumn()).getValues();
-
-  // Tìm header row — dòng có "TÊN KHÁCH HÀNG"
-  var headerRow = -1;
-  for (var i = 0; i &lt; allData.length; i++) {
-    for (var j = 0; j &lt; allData[i].length; j++) {
-      if (String(allData[i][j]).indexOf('KHÁCH HÀNG') !== -1 ||
-          String(allData[i][j]).indexOf('Tên khách') !== -1) {
-        headerRow = i;
-        break;
-      }
-    }
-    if (headerRow !== -1) break;
-  }
-
-  // Tìm cột "Đã thanh toán"
-  var daTTCol = -1;
-  var tenKHCol = -1;
-  if (headerRow !== -1) {
-    for (var k = 0; k &lt; allData[headerRow].length; k++) {
-      var h = String(allData[headerRow][k]).toLowerCase();
-      if (h.indexOf('thanh toán') !== -1 || h.indexOf('đã tt') !== -1) daTTCol = k;
-      if (h.indexOf('tên khách') !== -1 || h.indexOf('khách hàng') !== -1) tenKHCol = k;
-    }
-  }
-
-  // Fallback: dùng vị trí cố định theo cấu trúc file gốc
-  // Sheet Nợ khách: cột C (index 2) = Tên KH, cột H (index 7) = Đã thanh toán
-  if (tenKHCol === -1) tenKHCol = 2;
-  if (daTTCol  === -1) daTTCol  = 7;
-
-  // Tìm dòng khách hàng (bắt đầu từ row sau header)
-  var startRow = (headerRow !== -1) ? headerRow + 2 : 3;
+  if (last &lt; 2) return { ok: false, msg: 'Sheet No khach chua co du lieu' };
+  var allData  = ws.getRange(1, 1, last, ws.getLastColumn()).getValues();
+  var tenKHCol = 2, daTTCol = 7, startRow = 2;
+  for (var i = 0; i &lt; allData.length; i++)
+    for (var j = 0; j &lt; allData[i].length; j++)
+      if (String(allData[i][j]).indexOf('KHÁCH HÀNG') !== -1) { startRow = i + 2; }
   var foundRow = -1;
-
-  for (var r = startRow - 1; r &lt; allData.length; r++) {
-    var tenKH = String(allData[r][tenKHCol] || '').trim();
-    if (tenKH === d.khachHang.trim()) {
-      foundRow = r + 1; // 1-based row number cho Sheets API
-      break;
-    }
-  }
-
+  for (var r = startRow - 1; r &lt; allData.length; r++)
+    if (String(allData[r][tenKHCol]||'').trim() === d.khachHang.trim()) { foundRow = r + 1; break; }
   if (foundRow === -1) {
-    // KH không có trong Nợ khách → ghi dòng mới
-    var newRow = [];
-    for (var x = 0; x &lt; 10; x++) newRow.push('');
-    newRow[tenKHCol] = d.khachHang;
-    newRow[daTTCol]  = parseFloat(d.soTien) || 0;
+    var newRow = ['','',d.khachHang,'','','','',parseFloat(d.soTien)||0,'',''];
     ws.appendRow(newRow);
-    return {
-      ok:       true,
-      khachHang: d.khachHang,
-      daTT:      parseFloat(d.soTien) || 0,
-      note:      'Tạo dòng mới vì KH chưa có trong Nợ khách'
-    };
+    return { ok: true, khachHang: d.khachHang, daTT: parseFloat(d.soTien)||0 };
   }
-
-  // Cộng thêm vào giá trị hiện tại
-  var cell   = ws.getRange(foundRow, daTTCol + 1); // +1 vì getRange dùng 1-based col
-  var oldVal = parseFloat(cell.getValue()) || 0;
-  var newVal = oldVal + (parseFloat(d.soTien) || 0);
+  var cell = ws.getRange(foundRow, daTTCol + 1);
+  var newVal = (parseFloat(cell.getValue())||0) + (parseFloat(d.soTien)||0);
   cell.setValue(newVal);
-
-  return {
-    ok:        true,
-    khachHang: d.khachHang,
-    soTienThu: parseFloat(d.soTien) || 0,
-    daTT:      newVal,
-    ghiChu:    d.ghiChu || ''
-  };
+  return { ok: true, khachHang: d.khachHang, daTT: newVal };
 }
-
-// ── Handler: Thêm khách hàng ──────────────────────────────────
-// Columns: id-customer | Ngày tháng | Tên KH | Người phụ trách |
-//          S1 | S2 | S3
 
 function handleThemKH(ss, d) {
   var ws  = ss.getSheetByName(SHEET_NAMES.danhMucKH);
   var seq = nextSeq(ws);
   var id  = 'KH-' + pad(seq, 3);
-
-  ws.appendRow([
-    id,
-    d.ngay      || new Date().toLocaleDateString('vi-VN'),
-    d.ten       || '',
-    d.phuTrach  || 'Vũ Tiến Lực',
-    '',
-    '',
-    ''
-  ]);
-
-  return {
-    ok:  true,
-    id:  id,
-    ten: d.ten
-  };
+  ws.appendRow([id, d.ngay||'', d.ten||'', d.phuTrach||'Vu Tien Luc', '', '', '']);
+  return { ok: true, id: id, ten: d.ten };
 }
 </pre>
       </div>
@@ -1375,8 +1338,194 @@ document.addEventListener('DOMContentLoaded', () => {
       renderXkTabs();
     }
     if (typeof renderPhieu === 'function') renderPhieu();
+    // Khởi động realtime sync nếu đã có URL
+    startSync();
   }, 80);
 });
+
+// ══ SYNC ENGINE ══
+
+var SYNC = {
+  interval:  null,
+  polling:   30000,  // 30 giây
+  lastTs:    0,
+  isLoading: false,
+  connected: false,
+};
+
+// Khởi động sync khi có URL
+function startSync() {
+  var url = localStorage.getItem('vp_sheet_url');
+  if (!url) return;
+  // Load ngay lập tức
+  syncFromSheets();
+  // Rồi polling mỗi 30s
+  if (SYNC.interval) clearInterval(SYNC.interval);
+  SYNC.interval = setInterval(syncFromSheets, SYNC.polling);
+}
+
+function stopSync() {
+  if (SYNC.interval) { clearInterval(SYNC.interval); SYNC.interval = null; }
+}
+
+// Gọi GET ?action=getAll để lấy toàn bộ dữ liệu
+async function syncFromSheets() {
+  var url = localStorage.getItem('vp_sheet_url');
+  if (!url || SYNC.isLoading) return;
+  SYNC.isLoading = true;
+  setSyncStatus('syncing');
+  try {
+    var fetchUrl = url.split('?')[0] + '?action=getAll&_t=' + Date.now();
+    var res  = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); } catch(pe) {
+      throw new Error('Phản hồi không phải JSON — kiểm tra lại GAS đã deploy chưa');
+    }
+    if (!data.ok) throw new Error(data.msg || 'Sync failed');
+
+    // 1. Cập nhật dropdown KH
+    if (data.khachHang && data.khachHang.length) {
+      updateKhDropdowns(data.khachHang);
+      // Cập nhật bảng KH trong tab Quản lý KH
+      updateKhTable(data.khachHang);
+    }
+
+    // 2. Cập nhật NCC (nhà dệt, nhuộm)
+    if (data.ncc && data.ncc.length) {
+      updateNccDropdowns(data.ncc);
+    }
+
+    // 3. Cập nhật nợ khách (hiển thị live trong tab Thu tiền)
+    if (data.noKhach) {
+      SYNC.noKhach = data.noKhach;
+    }
+
+    // 4. Cập nhật sequence IDs
+    if (data.seq) {
+      SYNC.seq = data.seq;
+      // Cập nhật ID preview
+      if (data.seq.pxk) {
+        var pxkId = 'PXK-VTP-' + String(data.seq.pxk).padStart(3,'0');
+        safeText('xk-id-preview', pxkId);
+        localStorage.setItem('vp_pxk_counter', String(data.seq.pxk - 1));
+      }
+    }
+
+    SYNC.lastTs    = data.ts || Date.now();
+    SYNC.connected = true;
+    setSyncStatus('ok');
+  } catch(err) {
+    SYNC.connected = false;
+    setSyncStatus('error');
+    console.warn('Sync error:', err.message);
+  } finally {
+    SYNC.isLoading = false;
+  }
+}
+
+// Cập nhật tất cả dropdown Khách Hàng
+function updateKhDropdowns(khList) {
+  var opts = '<option value="">— Chọn khách hàng —</option>';
+  khList.forEach(function(kh) {
+    opts += '<option value="' + kh.ten + '">' + kh.ten + '</option>';
+  });
+  // Cập nhật tất cả select KH trong app
+  ['xk-kh','tt-kh'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var cur = el.value;
+    el.innerHTML = opts;
+    if (cur) el.value = cur; // giữ lựa chọn hiện tại
+  });
+}
+
+// Cập nhật dropdown NCC (nhà dệt, nhà nhuộm)
+function updateNccDropdowns(nccList) {
+  var detOpts  = '<option value="">— Chọn nhà dệt —</option>';
+  var nhuomOpts= '<option value="">— Chọn nhà nhuộm —</option>';
+  nccList.forEach(function(n) {
+    var loai = (n.loai || '').toUpperCase();
+    var opt  = '<option>' + n.ten + '</option>';
+    if (loai.indexOf('DỆT') !== -1 || loai.indexOf('DET') !== -1) detOpts   += opt;
+    if (loai.indexOf('NHUỘM') !== -1 || loai.indexOf('NHUOM') !== -1) nhuomOpts += opt;
+  });
+  ['nvm-det','vtp-det'].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cur = el.value; el.innerHTML = detOpts; if (cur) el.value = cur;
+  });
+  ['nvm-nhuom','vtp-nhuom'].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cur = el.value; el.innerHTML = nhuomOpts; if (cur) el.value = cur;
+  });
+}
+
+// Cập nhật bảng KH trong tab Quản lý KH
+function updateKhTable(khList) {
+  var tbody = document.getElementById('kh-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  khList.forEach(function(kh) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + kh.id + '</td><td>' + kh.ten + '</td><td>' + (kh.phuTrach||'') + '</td>';
+    tbody.appendChild(tr);
+  });
+  STATE.khCount = khList.length;
+  updateKhId();
+}
+
+// Hiển thị nợ KH live trong màn hình Thu tiền
+function loadKhDebt() {
+  var kh = document.getElementById('tt-kh');
+  if (!kh || !kh.value) { document.getElementById('tt-debt-info').style.display='none'; return; }
+  var tenKH = kh.value;
+  document.getElementById('tt-debt-info').style.display='block';
+
+  // Tìm trong SYNC.noKhach
+  var noData = (SYNC.noKhach || []).find(function(n){ return n.ten === tenKH; });
+  if (noData) {
+    safeText('tt-tong-mua', fmtNum(noData.tongNo) + '₫');
+    safeText('tt-da-tt',    fmtNum(noData.daTT) + '₫');
+    safeText('tt-con-no',   fmtNum(Math.max(0, noData.conNo)) + '₫');
+    // Đổi màu nếu còn nợ
+    var conNoEl = document.getElementById('tt-con-no');
+    if (conNoEl) conNoEl.style.color = noData.conNo > 0 ? 'var(--red)' : 'var(--green)';
+  } else {
+    safeText('tt-tong-mua', '—');
+    safeText('tt-da-tt',    '—');
+    safeText('tt-con-no',   '—');
+  }
+}
+
+// Status indicator
+function setSyncStatus(status) {
+  var dot  = document.getElementById('gs-dot');
+  var text = document.getElementById('gs-status-text');
+  var ts   = document.getElementById('gs-sync-ts');
+  if (!dot) return;
+
+  if (status === 'syncing') {
+    dot.className  = 'gs-dot syncing';
+    if (text) text.textContent = 'Đang đồng bộ...';
+  } else if (status === 'ok') {
+    dot.className  = 'gs-dot connected';
+    var now = new Date();
+    var hhmm = (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+    if (text) text.textContent = 'Đồng bộ ' + hhmm;
+    if (ts)   ts.textContent   = hhmm;
+    // Cập nhật panel
+    safeText('sync-last-time', hhmm);
+    safeText('sync-state-badge', '✓ Đang hoạt động');
+    var badge = document.getElementById('sync-state-badge');
+    if (badge) badge.style.color = 'var(--green)';
+    var panel = document.getElementById('sync-status-panel');
+    if (panel) panel.style.display = 'block';
+    if (SYNC.noKhach) safeText('sync-kh-count', (SYNC.noKhach.length||0) + ' KH');
+  } else {
+    dot.className  = 'gs-dot error';
+    if (text) text.textContent = 'Mất kết nối';
+  }
+}
 
 // ══ NAVIGATION ══
 const PAGE_META = {
@@ -1397,6 +1546,27 @@ function showPage(name) {
   safeText('topbar-title', m.title || '');
   safeText('topbar-sub', m.sub || '');
   safeText('sheet-name-badge', m.sheet ? '→ ' + m.sheet : '');
+}
+
+// ── Chặn ký tự không phải số ──
+// allowDot=true: cho phép dấu chấm (.) cho ô kg
+// allowDot=false: chỉ số nguyên (ô rộng, giá tiền)
+function blockNonNumeric(e, allowDot) {
+  var k = e.key;
+  // Luôn cho phép: phím điều hướng, xóa, copy/paste, Tab, Enter
+  var allowed = ['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight',
+                 'ArrowUp','ArrowDown','Home','End'];
+  if (allowed.indexOf(k) !== -1) return;
+  // Cho phép Ctrl/Cmd + A/C/V/X/Z
+  if (e.ctrlKey || e.metaKey) return;
+  // Cho phép dấu chấm nếu allowDot và chưa có dấu chấm
+  if (allowDot && k === '.') {
+    var val = e.target.value || '';
+    if (val.indexOf('.') !== -1) e.preventDefault(); // chặn nếu đã có dấu chấm
+    return;
+  }
+  // Chặn nếu không phải chữ số 0-9
+  if (!/^[0-9]$/.test(k)) e.preventDefault();
 }
 
 // ══ ROLL TABLES ══
@@ -1556,7 +1726,7 @@ function renderRolls(type) {
     if (type === 'nvm') {
       c4 = `<input class="roll-input roll-col4" placeholder="—" value="${r.w||''}"
         inputmode="numeric" style="text-align:right;font-size:12px"
-        oninput="updateRollW('nvm',${i},this.value)" onkeydown="handleRollKey(event,'nvm',${i})" onfocus="this.select()">`;
+        oninput="updateRollW('nvm',${i},this.value)" onkeydown="handleRollKey(event,'nvm',${i});blockNonNumeric(event,false)" onfocus="this.select()">`;
     } else {
       const price = type==='xk' ? donGia : giaNhuom;
       c4 = filled
@@ -1571,7 +1741,7 @@ function renderRolls(type) {
         ` value="${dispVal}"`+
         ` oninput="updateRollKg('${type}',${i},this.value)"`+
         ` onblur="onBlurKg(this,'${type}',${i})"`+
-        ` onkeydown="handleRollKey(event,'${type}',${i})"`+
+        ` onkeydown="handleRollKey(event,'${type}',${i});blockNonNumeric(event,true)"`+
         ` onfocus="this.select()"></div>`+
       c4+
       `<div><button class="roll-del" onclick="removeRoll('${type}',${i})">×</button></div>`;
@@ -1846,23 +2016,49 @@ function renderPhieu() {
   var ngayIn = (now.getDate()<10?'0':'')+now.getDate()+'/'+(now.getMonth()<9?'0':'')+(now.getMonth()+1)+'/'+now.getFullYear();
 
   // Grid kg: 10 cây/hàng
-  function buildKgGrid(rollList) {
+  function buildKgGrid(rollList, startNum) {
+    // startNum: số thứ tự bắt đầu (để phân biệt cây giữa các mặt hàng)
+    // Số thứ tự CHỈ dùng để hiển thị trên phiếu — KHÔNG lưu vào database
     var onlyFilled = rollList.filter(function(r){ return parseFloat(r.kg)>0; });
     if (!onlyFilled.length) {
       return '<tr><td colspan="10" style="text-align:center;color:#bbb;font-size:10px;padding:4px">Chưa có dữ liệu</td></tr>';
     }
-    var rows = '';
+    var n0   = (startNum || 1);
     var COLS = 10;
+    var rows = '';
+
+    // Header số thứ tự (01, 02, ... 10 per row)
     var numRows = Math.ceil(onlyFilled.length / COLS);
     for (var r2 = 0; r2 < numRows; r2++) {
-      rows += '<tr>';
+      // --- Hàng số thứ tự ---
+      rows += '<tr style="background:#f0f4f8">';
       for (var c2 = 0; c2 < COLS; c2++) {
-        var i2 = r2 * COLS + c2;
+        var i2  = r2 * COLS + c2;
+        var seq = n0 + i2;
         if (i2 < onlyFilled.length) {
-          var kg2 = parseFloat(onlyFilled[i2].kg) || 0;
-          rows += '<td style="text-align:center;font-size:9.5px;font-weight:600;font-family:monospace;padding:2px 1px;border:0.5px solid #ccc">' + kg2.toFixed(1) + '</td>';
+          rows += '<td style="text-align:center;font-size:8px;color:#64748b;font-weight:700;'
+                + 'font-family:monospace;padding:1px 1px 0;border:0.5px solid #ccc;line-height:1.2">'
+                + (seq < 10 ? '0' : '') + seq
+                + '</td>';
         } else {
-          rows += '<td style="border:0.5px solid #ccc;padding:2px 1px">&nbsp;</td>';
+          rows += '<td style="border:0.5px solid #ccc;padding:1px">&nbsp;</td>';
+        }
+      }
+      rows += '</tr>';
+
+      // --- Hàng kg ---
+      rows += '<tr>';
+      for (var c3 = 0; c3 < COLS; c3++) {
+        var i3  = r2 * COLS + c3;
+        if (i3 < onlyFilled.length) {
+          var kg2 = parseFloat(onlyFilled[i3].kg) || 0;
+          rows += '<td style="text-align:center;font-size:9.5px;font-weight:700;'
+                + 'font-family:monospace;padding:2px 1px 3px;border:0.5px solid #ccc;'
+                + 'border-top:none;color:#0f2744">'
+                + kg2.toFixed(1)
+                + '</td>';
+        } else {
+          rows += '<td style="border:0.5px solid #ccc;border-top:none;padding:2px 1px">&nbsp;</td>';
         }
       }
       rows += '</tr>';
@@ -1870,11 +2066,8 @@ function renderPhieu() {
     return rows;
   }
 
-  // Header cột 01–10
+  // colHeader removed — số cột không hiển thị nữa
   var colHeader = '';
-  for (var i = 1; i <= 10; i++) {
-    colHeader += '<th style="width:38px;text-align:center;font-size:9px;font-weight:700;background:#e8edf2;padding:3px 1px;border:0.5px solid #aaa">'+(i<10?'0':'')+i+'</th>';
-  }
 
   var ttOk = (tt === 'Đã thanh toán');
   var ttBadge = ttOk
@@ -1883,6 +2076,7 @@ function renderPhieu() {
 
   // Build block cho TỪNG item
   var blockHtml = '';
+  var itemStartNum = 1; // đếm STT cây tích lũy qua các mặt hàng
   allItems.forEach(function(item) {
     var h = item.hang || '';
     var g = item.donGia || 0;
@@ -1892,6 +2086,8 @@ function renderPhieu() {
     var itemCay    = itemFilled.length;
     if (!h && !itemCay) return; // bỏ qua item trống hoàn toàn
 
+    var thisStart = itemStartNum;
+    itemStartNum += itemCay; // tăng đếm cho item tiếp theo
     blockHtml +=
       '<tr>' +
         '<td style="vertical-align:top;padding:5px 7px;width:190px;border:0.5px solid #bbb;background:#fafbfd">' +
@@ -1906,8 +2102,7 @@ function renderPhieu() {
         '</td>'+
         '<td style="vertical-align:top;padding:2px;border:0.5px solid #bbb">'+
           '<table style="border-collapse:collapse;width:100%">'+
-            '<thead><tr>'+colHeader+'</tr></thead>'+
-            '<tbody>'+buildKgGrid(item.rolls)+'</tbody>'+
+            '<tbody>'+buildKgGrid(item.rolls, thisStart)+'</tbody>'+
           '</table>'+
         '</td>'+
       '</tr>';
@@ -1946,7 +2141,7 @@ function renderPhieu() {
       '<table style="width:100%;border-collapse:collapse;margin-bottom:6px">'+
         '<thead><tr>'+
           '<th style="background:#2d3748;color:#fff;padding:5px 8px;text-align:center;font-size:10px;border:0.5px solid #555;width:200px">Thông Tin Xuất Hàng</th>'+
-          '<th style="background:#2d3748;color:#fff;padding:5px 8px;text-align:center;font-size:10px;border:0.5px solid #555" colspan="10">01 &nbsp; 02 &nbsp; 03 &nbsp; 04 &nbsp; 05 &nbsp; 06 &nbsp; 07 &nbsp; 08 &nbsp; 09 &nbsp; 10</th>'+
+          '<th style="background:#2d3748;color:#fff;padding:5px 8px;text-align:center;font-size:10px;border:0.5px solid #555" colspan="10">Danh Sách Cây Vải</th>'+
         '</tr></thead>'+
         '<tbody>'+blockHtml+'</tbody>'+
       '</table>'+
@@ -1976,7 +2171,7 @@ function renderPhieu() {
     '</div>'+
 
     // NÚT (không in)
-    '<div class="phieu-actions">'+
+    '<div class="phieu-actions no-print">'+
       '<button class="btn btn-print" onclick="printPhieu()">'+
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'+
         'In phiếu'+
@@ -1992,15 +2187,65 @@ function renderPhieu() {
 }
 
 function printPhieu() {
-  document.getElementById('page-xuat-kho').classList.add('print-active');
-  window.print();
-  document.getElementById('page-xuat-kho').classList.remove('print-active');
+  var previewEl = document.getElementById('phieu-preview');
+  if (!previewEl) { toast('Chưa có phiếu để in!', 'error'); return; }
+
+  // Lấy div nội dung phiếu (không lấy nút actions)
+  var phieuDiv = previewEl.querySelector('div');
+  if (!phieuDiv) { toast('Phiếu chưa có dữ liệu! Hãy điền form trước.', 'error'); return; }
+
+  var fontUrl = 'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap';
+
+  var printHtml = '<!DOCTYPE html><html lang="vi"><head>'
+    + '<meta charset="UTF-8">'
+    + '<title>Phiếu Giao Hàng</title>'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link href="' + fontUrl + '" rel="stylesheet">'
+    + '<style>'
+    + '* { margin:0; padding:0; box-sizing:border-box; }'
+    + 'body { font-family:"Be Vietnam Pro",Arial,sans-serif; background:#fff; color:#111; padding:0; margin:0; }'
+    + 'table { border-collapse:collapse; }'
+    + '.no-print { display:none!important; }'
+    + '@page { margin:8mm 10mm; size:A4 portrait; }'
+    + '@media print {'
+    + '  html, body { width:100%; height:auto; }'
+    + '  body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
+    + '}'
+    + '</style>'
+    + '</head><body>'
+    + phieuDiv.outerHTML
+    + '</body></html>';
+
+  var win = window.open('', '_blank', 'width=860,height=720,menubar=no,toolbar=no');
+  if (!win) {
+    toast('Trình duyệt chặn popup! Vào Settings → cho phép popup từ trang này.', 'error');
+    return;
+  }
+  win.document.open();
+  win.document.write(printHtml);
+  win.document.close();
+
+  // Đợi font + hình ảnh load xong rồi in
+  var tryPrint = function() {
+    try {
+      win.focus();
+      win.print();
+    } catch(e) {
+      toast('Lỗi in: ' + e.message, 'error');
+    }
+  };
+  if (win.document.readyState === 'complete') {
+    setTimeout(tryPrint, 700);
+  } else {
+    win.onload = function() { setTimeout(tryPrint, 500); };
+  }
 }
 
 function exportPDF() {
-  toast('Trong h\u1ed9p tho\u1ea1i In: ch\u1ecdn "Save as PDF" l\u00e0m m\u00e1y in', 'info');
-  setTimeout(function(){ printPhieu(); }, 800);
+  toast('Trong hộp thoại In: chọn "Lưu dưới dạng PDF" làm máy in', 'info');
+  setTimeout(function(){ printPhieu(); }, 300);
 }
+
 // ══ SUBMIT ══
 function submitForm(type) {
   const payload = buildPayload(type);
@@ -2130,12 +2375,18 @@ async function doSubmit(type, payload) {
   }
   toast('Đang lưu...', 'info');
   try {
-    const res = await fetch(url, {
+    var cleanUrl = url.split('?')[0];
+    const res = await fetch(cleanUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload),
+      redirect: 'follow',
     });
-    const data = await res.json();
+    const rawText = await res.text();
+    let data;
+    try { data = JSON.parse(rawText); } catch(pe) {
+      throw new Error('GAS trả về không phải JSON: ' + rawText.substring(0,100));
+    }
     if (data.ok) {
       const msgs = {
         nhapVaiMoc:   `✓ Lưu lô ${data.lotId} — ${data.tongCay} cây, ${data.tongCan}kg`,
@@ -2147,10 +2398,11 @@ async function doSubmit(type, payload) {
       toast(msgs[payload.action]||'Lưu thành công!', 'success');
       if (payload.action === 'xuatKho') {
         confirmAndLockXkId();
-        // Sinh ID mới cho phiếu tiếp theo
         setTimeout(function(){ updateXkId(); renderPhieu(); }, 100);
       }
       resetForm(type);
+      // Sync lại ngay sau khi ghi — cập nhật ID, nợ, tồn kho
+      setTimeout(function(){ syncFromSheets(); }, 1500);
       if (type==='kh') addKhToTable(data.id, payload.ten, payload.phuTrach);
     } else {
       toast('❌ Lỗi: ' + (data.msg||'Không rõ'), 'error');
@@ -2219,13 +2471,19 @@ function saveConfig() {
   localStorage.setItem('vp_sheet_url', document.getElementById('cfg-url').value);
   localStorage.setItem('vp_sheet_id',  document.getElementById('cfg-sheet-id').value);
   updateConnStatus(!!document.getElementById('cfg-url').value);
+  // Khởi động realtime sync ngay khi lưu URL
+  startSync();
 }
 function clearConfig() {
+  stopSync();
   localStorage.removeItem('vp_sheet_url');
   localStorage.removeItem('vp_sheet_id');
   document.getElementById('cfg-url').value='';
   document.getElementById('cfg-sheet-id').value='';
   updateConnStatus(false);
+  setSyncStatus('error');
+  var panel = document.getElementById('sync-status-panel');
+  if (panel) panel.style.display='none';
   toast('Đã xóa cấu hình', 'info');
 }
 function updateConnStatus(connected) {
@@ -2233,25 +2491,64 @@ function updateConnStatus(connected) {
   safeText('gs-status-text', connected ? 'Đã cấu hình' : 'Chưa kết nối');
 }
 async function testConnection() {
-  const url = document.getElementById('cfg-url').value;
-  if (!url) { toast('Nhập URL trước!', 'error'); return; }
-  const el = document.getElementById('conn-result');
-  el.style.display='block'; el.style.background='#e8f4fd'; el.style.color='#1a4f8a';
-  el.textContent = '🔄 Đang kiểm tra...';
+  var urlInput = document.getElementById('cfg-url').value.trim();
+  if (!urlInput) { toast('Nhập URL trước!', 'error'); return; }
+
+  var el = document.getElementById('conn-result');
+  el.style.display = 'block';
+  el.style.background = '#e8f4fd';
+  el.style.color = '#1a4f8a';
+  el.innerHTML = '🔄 Đang kiểm tra kết nối...';
+
+  // Loại bỏ query string cũ nếu có
+  var baseUrl = urlInput.split('?')[0];
+
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.ok) {
-      el.style.background='#e0f9f3'; el.style.color='#00886e';
-      el.textContent = '✅ Kết nối thành công! ' + (data.msg||'');
-      updateConnStatus(true);
-    } else {
-      el.style.background='#fdecea'; el.style.color='#c0392b';
-      el.textContent = '❌ Lỗi: ' + data.msg;
+    // Google Apps Script cần gọi qua URL đầy đủ với ?action=ping
+    // Dùng no-cors để tránh lỗi CORS khi preflight
+    var pingUrl = baseUrl + '?action=ping';
+    var res = await fetch(pingUrl, {
+      method: 'GET',
+      redirect: 'follow',
+    });
+
+    // GAS luôn trả 200, parse JSON
+    var text = await res.text();
+    var data;
+    try {
+      data = JSON.parse(text);
+    } catch(pe) {
+      throw new Error('Phản hồi không phải JSON. URL có thể sai hoặc chưa deploy đúng.');
     }
-  } catch(e) {
-    el.style.background='#fdecea'; el.style.color='#c0392b';
-    el.textContent = '❌ Không kết nối được. Kiểm tra URL và quyền truy cập.';
+
+    if (data && data.ok) {
+      el.style.background = '#e0f9f3';
+      el.style.color      = '#00886e';
+      el.innerHTML = '✅ Kết nối thành công! ' + (data.msg || '') + '<br>'
+        + '<span style="font-size:11px;opacity:.7">URL đã lưu. Đang tải dữ liệu từ Sheets...</span>';
+      // Lưu URL sạch
+      localStorage.setItem('vp_sheet_url', baseUrl);
+      document.getElementById('cfg-url').value = baseUrl;
+      updateConnStatus(true);
+      startSync();
+    } else {
+      el.style.background = '#fdecea';
+      el.style.color      = '#c0392b';
+      el.textContent = '❌ Script trả lỗi: ' + (data && data.msg ? data.msg : 'Không rõ');
+    }
+  } catch(err) {
+    el.style.background = '#fdecea';
+    el.style.color      = '#c0392b';
+    el.innerHTML =
+      '❌ Không kết nối được.<br>'
+      + '<span style="font-size:11px">'
+      + 'Nguyên nhân thường gặp:<br>'
+      + '① URL sai — kiểm tra lại link trong Apps Script<br>'
+      + '② Chưa deploy — Deploy → New deployment → Web app<br>'
+      + '③ Quyền sai — "Execute as: Me" + "Who has access: Anyone"<br>'
+      + '④ Chưa allow quyền lần đầu — Deploy xong phải nhấn Allow'
+      + '</span><br>'
+      + '<span style="font-size:10px;opacity:.6;font-family:monospace">' + err.message + '</span>';
   }
 }
 
