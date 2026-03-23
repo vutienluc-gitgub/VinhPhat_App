@@ -1831,14 +1831,6 @@ function updateKhId() {
 }
 
 // ══ THU TIỀN ══
-function loadKhDebt() {
-  const kh = document.getElementById('tt-kh').value;
-  if (!kh) { document.getElementById('tt-debt-info').style.display='none'; return; }
-  document.getElementById('tt-debt-info').style.display='block';
-  safeText('tt-tong-mua', '(từ Google Sheets)');
-  safeText('tt-da-tt', '(từ Google Sheets)');
-  safeText('tt-con-no', '—');
-}
 function updateTtRemaining() {
   const el = document.getElementById('tt-remaining');
   const so = parseFloat(document.getElementById('tt-so-tien').value)||0;
