@@ -3512,15 +3512,25 @@ function handleThemKH(ss, d) {
           return item.rolls.some(function (r) { return parseFloat(r.kg) > 0; });
         });
         if (!hasAnyRoll) { toast('Chưa nhập kg cho cây nào!', 'error'); return null; }
-        // Gửi item đầu tiên (hoặc có thể loop gửi nhiều)
-        var item = STATE.xk.items[XK_ACTIVE];
-        var kgs = item.rolls.map(function (r) { return parseFloat(r.kg) || 0; }).filter(function (k) { return k > 0; });
-        var tongCan = kgs.reduce(function (a, b) { return a + b; }, 0);
+        // Gửi TẤT CẢ items (không chỉ active)
+        var items = [];
+        var tongCanAll = 0, tongCayAll = 0;
+        STATE.xk.items.forEach(function (item) {
+          var kgs = item.rolls.map(function (r) { return parseFloat(r.kg) || 0; }).filter(function (k) { return k > 0; });
+          if (!kgs.length && !item.hang) return; // bỏ item trống hoàn toàn
+          var tongCan = kgs.reduce(function (a, b) { return a + b; }, 0);
+          tongCanAll += tongCan;
+          tongCayAll += kgs.length;
+          items.push({ tenHang: item.hang || '', donGia: item.donGia || 0, tongCan: +tongCan.toFixed(2), tongCay: kgs.length, kgs: kgs });
+        });
+        if (!items.length) { toast('Chưa có mặt hàng nào có dữ liệu!', 'error'); return null; }
         return {
-          action: 'xuatKho', ngay: ngay, khachHang: kh, tenHang: item.hang || '',
-          xe: getVal('xk-xe'), donGia: item.donGia || 0,
+          action: 'xuatKho', ngay: ngay, khachHang: kh,
+          xe: getVal('xk-xe'),
           trangThai: getVal('xk-tt') || 'Chưa thanh toán',
-          tongCan: +tongCan.toFixed(2), tongCay: kgs.length, kgs: kgs
+          ghiChu: getVal('xk-ghi-chu'),
+          tongCan: +tongCanAll.toFixed(2), tongCay: tongCayAll,
+          items: items
         };
       }
       if (type === 'tt') {
@@ -3563,13 +3573,20 @@ function handleThemKH(ss, d) {
         row('Tổng cây', p.tongCay + ' cây'), row('Tổng cân TP', p.tongCan.toFixed(1) + ' kg'),
         row('Nợ nhuộm', fmtNum(Math.round(p.giaNhuom * p.tongCan)) + '₫'),
       ].join('');
-      if (type === 'xk') return [
-        row('Khách hàng', p.khachHang), row('Tên hàng', p.tenHang),
-        row('Ngày xuất', p.ngay), row('Đơn giá', fmtNum(p.donGia) + '₫/kg'),
-        row('Tổng cây', p.tongCay + ' cây'), row('Tổng cân', p.tongCan.toFixed(1) + ' kg'),
-        row('Tổng tiền', fmtNum(Math.round(p.donGia * p.tongCan)) + '₫'),
-        row('Thanh toán', p.trangThai),
-      ].join('');
+      if (type === 'xk') {
+        var lines = [
+          row('Khách hàng', p.khachHang),
+          row('Ngày xuất', p.ngay),
+          row('Tổng cây', p.tongCay + ' cây'),
+          row('Tổng cân', p.tongCan.toFixed(1) + ' kg'),
+        ];
+        (p.items || []).forEach(function (it, idx) {
+          var tien = Math.round((it.donGia || 0) * (it.tongCan || 0));
+          lines.push(row('Hàng ' + (idx + 1), (it.tenHang || '—') + ' · ' + fmtNum(it.donGia) + '₫/kg · ' + fmtNum(tien) + '₫'));
+        });
+        lines.push(row('Thanh toán', p.trangThai));
+        return lines.join('');
+      }
       if (type === 'tt') return [
         row('Khách hàng', p.khachHang),
         row('Số tiền thu', fmtNum(p.soTien) + '₫'),
