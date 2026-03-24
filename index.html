@@ -2144,6 +2144,13 @@
                     đây]</strong>/edit</span>
               </div>
 
+              <div class="form-group" style="margin-bottom:16px">
+                <label class="form-label">Tên người in phiếu</label>
+                <input type="text" class="form-control" id="cfg-nguoi-in"
+                  placeholder="Nhập tên người in (VD: HUONG)" oninput="saveConfig()">
+                <span class="form-hint">Tên này sẽ xuất hiện trên góc phải Phiếu Xuất Kho</span>
+              </div>
+
               <div style="display:flex;gap:10px">
                 <button class="btn btn-primary" onclick="testConnection()">🔗 Kiểm tra kết nối</button>
                 <button class="btn btn-outline" onclick="clearConfig()">Xóa cấu hình</button>
@@ -2444,9 +2451,17 @@ function handleThuTien(ss, d) {
   if (last &lt; 2) return { ok: false, msg: 'Sheet No khach chua co du lieu' };
   var allData  = ws.getRange(1, 1, last, ws.getLastColumn()).getValues();
   var tenKHCol = 2, daTTCol = 7, startRow = 2;
-  for (var i = 0; i &lt; allData.length; i++)
-    for (var j = 0; j &lt; allData[i].length; j++)
-      if (String(allData[i][j]).indexOf('KHÁCH HÀNG') !== -1) { startRow = i + 2; }
+  var foundHeader = false;
+  for (var i = 0; i &lt; allData.length; i++) {
+    for (var j = 0; j &lt; allData[i].length; j++) {
+      if (String(allData[i][j]).indexOf('KHÁCH HÀNG') !== -1) {
+        startRow = i + 2;
+        foundHeader = true;
+        break;
+      }
+    }
+    if (foundHeader) break;
+  }
   var foundRow = -1;
   for (var r = startRow - 1; r &lt; allData.length; r++)
     if (String(allData[r][tenKHCol]||'').trim() === d.khachHang.trim()) { foundRow = r + 1; break; }
@@ -2523,6 +2538,16 @@ function handleThemKH(ss, d) {
     function xkItem(idx) { return STATE.xk.items[idx]; }
 
     // Null-safe DOM helpers
+    function escapeHtml(unsafe) {
+      if (unsafe == null) return '';
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function safeText(id, val) {
       var el = document.getElementById(id);
       if (el) el.textContent = val;
@@ -2660,7 +2685,8 @@ function handleThemKH(ss, d) {
     function updateKhDropdowns(khList) {
       var opts = '<option value="">— Chọn khách hàng —</option>';
       khList.forEach(function (kh) {
-        opts += '<option value="' + kh.ten + '">' + kh.ten + '</option>';
+        var safeTen = escapeHtml(kh.ten);
+        opts += '<option value="' + safeTen + '">' + safeTen + '</option>';
       });
       // Cập nhật tất cả select KH trong app
       ['xk-kh', 'tt-kh'].forEach(function (id) {
@@ -2678,7 +2704,8 @@ function handleThemKH(ss, d) {
       var nhuomOpts = '<option value="">— Chọn nhà nhuộm —</option>';
       nccList.forEach(function (n) {
         var loai = (n.loai || '').toUpperCase();
-        var opt = '<option>' + n.ten + '</option>';
+        var safeTen = escapeHtml(n.ten);
+        var opt = '<option>' + safeTen + '</option>';
         if (loai.indexOf('DỆT') !== -1 || loai.indexOf('DET') !== -1) detOpts += opt;
         if (loai.indexOf('NHUỘM') !== -1 || loai.indexOf('NHUOM') !== -1) nhuomOpts += opt;
       });
@@ -2699,7 +2726,10 @@ function handleThemKH(ss, d) {
       tbody.innerHTML = '';
       khList.forEach(function (kh) {
         var tr = document.createElement('tr');
-        tr.innerHTML = '<td>' + kh.id + '</td><td>' + kh.ten + '</td><td>' + (kh.phuTrach || '') + '</td>';
+        var td1 = document.createElement('td'); td1.textContent = kh.id;
+        var td2 = document.createElement('td'); td2.textContent = kh.ten;
+        var td3 = document.createElement('td'); td3.textContent = kh.phuTrach || '';
+        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
         tbody.appendChild(tr);
       });
       STATE.khCount = khList.length;
@@ -3209,11 +3239,11 @@ function handleThemKH(ss, d) {
       // STATE.xk.items đã được update real-time qua onItemHangChange/onItemGiaChange/updateRollKg
 
       var ngay = getVal('xk-ngay');
-      var kh = getVal('xk-kh');
-      var xe = getVal('xk-xe');
+      var kh = escapeHtml(getVal('xk-kh'));
+      var xe = escapeHtml(getVal('xk-xe'));
       var tt = getVal('xk-tt') || 'Chưa thanh toán';
-      var ghiChu = getVal('xk-ghi-chu');
-      var phieuId = (document.getElementById('xk-id-preview') || {}).textContent || 'PXK-VTP-???';
+      var ghiChu = escapeHtml(getVal('xk-ghi-chu'));
+      var phieuId = escapeHtml((document.getElementById('xk-id-preview') || {}).textContent || 'PXK-VTP-???');
 
       var allItems = STATE.xk.items || [];
       var tongCanAll = 0, tongCayAll = 0;
@@ -3316,10 +3346,10 @@ function handleThemKH(ss, d) {
           '<tr>' +
           '<td style="vertical-align:top;padding:5px 7px;width:190px;border:0.5px solid #bbb;background:#fafbfd">' +
           '<table style="border-collapse:collapse;width:100%;font-size:9.5px;line-height:1.75">' +
-          '<tr style="background:#e8edf2"><td colspan="2" style="padding:2px 4px;font-weight:800;font-size:10px;letter-spacing:.3px">' + (h || '—') + '&nbsp;<span style="font-weight:400;color:#64748b">' + d.maHang + '</span></td></tr>' +
-          '<tr><td style="color:#64748b">Mã màu:</td><td style="font-weight:600">' + d.maMau + '</td></tr>' +
-          '<tr><td style="color:#64748b">Màu:</td><td style="font-weight:600">' + d.mau + '</td></tr>' +
-          '<tr><td style="color:#64748b">Khổ:</td><td style="font-weight:600">' + d.kho + '</td></tr>' +
+          '<tr style="background:#e8edf2"><td colspan="2" style="padding:2px 4px;font-weight:800;font-size:10px;letter-spacing:.3px">' + escapeHtml(h || '—') + '&nbsp;<span style="font-weight:400;color:#64748b">' + escapeHtml(d.maHang) + '</span></td></tr>' +
+          '<tr><td style="color:#64748b">Mã màu:</td><td style="font-weight:600">' + escapeHtml(d.maMau) + '</td></tr>' +
+          '<tr><td style="color:#64748b">Màu:</td><td style="font-weight:600">' + escapeHtml(d.mau) + '</td></tr>' +
+          '<tr><td style="color:#64748b">Khổ:</td><td style="font-weight:600">' + escapeHtml(d.kho) + '</td></tr>' +
           '<tr style="border-top:1px solid #e2e8f0"><td style="color:#64748b">Cây:</td><td style="font-weight:800;color:#0f2744">' + itemCay + '&nbsp;/&nbsp;' + itemCan.toFixed(1) + ' kg</td></tr>' +
           (g ? '<tr><td style="color:#64748b">Đ.giá:</td><td style="font-weight:600;color:#00886e">' + fmtNum(g) + '₫/kg</td></tr>' : '') +
           '</table>' +
@@ -3348,7 +3378,7 @@ function handleThemKH(ss, d) {
         '</div>' +
         '<div style="text-align:right;font-size:9px;line-height:1.8">' +
         '<div style="font-size:14px;font-weight:800;letter-spacing:.5px">' + phieuId + '</div>' +
-        '<div>Người In: <b>HUONG</b></div>' +
+        '<div>Người In: <b style="text-transform:uppercase">' + escapeHtml(localStorage.getItem('vp_nguoi_in') || 'HUONG') + '</b></div>' +
         '<div>Ngày In: ' + ngayIn + '</div>' +
         '</div>' +
         '</div>' +
@@ -3570,7 +3600,7 @@ function handleThemKH(ss, d) {
     }
 
     function buildSummaryHtml(type, p) {
-      const row = (k, v) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--muted)">${k}</span><strong>${v}</strong></div>`;
+      const row = (k, v) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--muted)">${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`;
       if (type === 'nvm') return [
         row('Nhà dệt', p.nhaDet), row('Tên hàng', p.tenHang),
         row('Ngày nhập', p.ngay), row('Giá dệt', fmtNum(p.giaDet) + '₫/kg'),
@@ -3746,13 +3776,18 @@ function handleThemKH(ss, d) {
     function loadConfig() {
       const url = localStorage.getItem('vp_sheet_url') || '';
       const sid = localStorage.getItem('vp_sheet_id') || '';
+      const nguoiIn = localStorage.getItem('vp_nguoi_in') || 'HUONG';
       document.getElementById('cfg-url').value = url;
       document.getElementById('cfg-sheet-id').value = sid;
+      const nguoiInEl = document.getElementById('cfg-nguoi-in');
+      if (nguoiInEl) nguoiInEl.value = nguoiIn;
       updateConnStatus(!!url);
     }
     function saveConfig() {
       localStorage.setItem('vp_sheet_url', document.getElementById('cfg-url').value);
       localStorage.setItem('vp_sheet_id', document.getElementById('cfg-sheet-id').value);
+      const nguoiInEl = document.getElementById('cfg-nguoi-in');
+      if (nguoiInEl) localStorage.setItem('vp_nguoi_in', nguoiInEl.value.trim() || 'HUONG');
       updateConnStatus(!!document.getElementById('cfg-url').value);
       // Khởi động realtime sync ngay khi lưu URL
       startSync();
