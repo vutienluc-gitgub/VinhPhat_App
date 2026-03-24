@@ -247,6 +247,12 @@
       font-family: inherit
     }
 
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .btn-primary {
       background: var(--sky);
       color: #fff
@@ -2409,7 +2415,7 @@ function handleVaiTP(ss, d) {
   for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
   tongCan = Math.round(tongCan * 100) / 100;
   var giaNhuom = parseFloat(d.giaNhuom) || 0;
-  var row = [id, d.ngay||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'', d.xe||'',
+  var row = [id, d.ngay||'', d.lotMoc||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'', d.xe||'',
              Math.round(giaNhuom*tongCan), giaNhuom, tongCan, kgs.length];
   for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
   ws.appendRow(row);
@@ -2510,6 +2516,7 @@ function handleThemKH(ss, d) {
       pendingAction: null,
       sheetUrl: '',
       khCount: 11,
+      isSubmitting: false,
     };
 
     // Lấy item đang active (theo tab index)
@@ -3465,6 +3472,7 @@ function handleThemKH(ss, d) {
 
     // ══ SUBMIT ══
     function submitForm(type) {
+      if (STATE.isSubmitting) return;
       const payload = buildPayload(type);
       if (!payload) return;
       const names = { nvm: 'lô vải mộc', vtp: 'vải thành phẩm', xk: 'phiếu xuất kho', tt: 'thanh toán', kh: 'khách hàng mới' };
@@ -3497,7 +3505,9 @@ function handleThemKH(ss, d) {
         const kgs = STATE.vtp.rolls.map(r => parseFloat(r.kg) || 0).filter(k => k > 0);
         const tongCan = kgs.reduce((a, b) => a + b, 0);
         return {
-          action: 'vaiThanhPham', ngay, nhaDet: document.getElementById('vtp-det').value,
+          action: 'vaiThanhPham', ngay, 
+          lotMoc: document.getElementById('vtp-lot-moc').value, 
+          nhaDet: document.getElementById('vtp-det').value,
           nhaNhuom: nhuom, tenHang: hang, xe: document.getElementById('vtp-xe').value,
           giaNhuom: parseFloat(document.getElementById('vtp-gia-nhuom').value) || 0,
           tongCan: +tongCan.toFixed(2), tongCay: kgs.length, kgs
@@ -3568,8 +3578,9 @@ function handleThemKH(ss, d) {
         row('Nợ dệt dự tính', fmtNum(Math.round(p.giaDet * p.tongCan)) + '₫'),
       ].join('');
       if (type === 'vtp') return [
-        row('Nhà nhuộm', p.nhaNhuom), row('Tên hàng', p.tenHang),
-        row('Ngày nhập TP', p.ngay), row('Giá nhuộm', fmtNum(p.giaNhuom) + '₫/kg'),
+        row('Lô mộc gốc', p.lotMoc || '—'), row('Nhà nhuộm', p.nhaNhuom), 
+        row('Tên hàng', p.tenHang), row('Ngày nhập TP', p.ngay), 
+        row('Giá nhuộm', fmtNum(p.giaNhuom) + '₫/kg'),
         row('Tổng cây', p.tongCay + ' cây'), row('Tổng cân TP', p.tongCan.toFixed(1) + ' kg'),
         row('Nợ nhuộm', fmtNum(Math.round(p.giaNhuom * p.tongCan)) + '₫'),
       ].join('');
@@ -3603,7 +3614,12 @@ function handleThemKH(ss, d) {
       safeHtml('confirm-body', '<div style="margin-bottom:4px">' + body + '</div>');
       document.getElementById('confirm-modal').style.display = 'flex';
       STATE.pendingAction = { type, payload };
-      document.getElementById('confirm-ok-btn').onclick = () => { closeModal(); doSubmit(type, payload); };
+      const btn = document.getElementById('confirm-ok-btn');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'Xác nhận lưu';
+        btn.onclick = () => { doSubmit(type, payload); };
+      }
     }
     function closeModal() {
       document.getElementById('confirm-modal').style.display = 'none';
@@ -3611,12 +3627,28 @@ function handleThemKH(ss, d) {
     }
 
     async function doSubmit(type, payload) {
+      if (STATE.isSubmitting) return;
       const url = localStorage.getItem('vp_sheet_url');
       if (!url) {
         toast('⚙ Chưa cấu hình URL Google Apps Script!', 'error');
         showPage('cai-dat');
         return;
       }
+      
+      STATE.isSubmitting = true;
+      const confirmBtn = document.getElementById('confirm-ok-btn');
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '⏳ Đang xử lý...';
+      }
+      
+      const mainBtn = document.querySelector('.page.active .btn-success');
+      const mainBtnHtml = mainBtn ? mainBtn.innerHTML : '';
+      if (mainBtn) {
+        mainBtn.disabled = true;
+        mainBtn.innerHTML = '⏳ Đang lưu...';
+      }
+      
       toast('Đang lưu...', 'info');
       try {
         var cleanUrl = url.split('?')[0];
@@ -3652,8 +3684,15 @@ function handleThemKH(ss, d) {
           toast('❌ Lỗi: ' + (data.msg || 'Không rõ'), 'error');
         }
       } catch (err) {
-        toast('❌ Không kết nối được Google Sheets. Kiểm tra URL và quyền.', 'error');
+        toast('❌ Lỗi hoặc không kết nối được Google Sheets. Kiểm tra URL và quyền.', 'error');
         console.error(err);
+      } finally {
+        STATE.isSubmitting = false;
+        closeModal();
+        if (mainBtn) {
+          mainBtn.disabled = false;
+          mainBtn.innerHTML = mainBtnHtml;
+        }
       }
     }
 
