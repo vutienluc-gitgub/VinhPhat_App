@@ -17,6 +17,9 @@ export const PAGE_META = {
   'xuat-kho': { title: 'Xuất kho bán hàng', sub: 'Tạo phiếu giao hàng cho khách', sheet: 'Phiếu xuất kho' },
   'thu-tien': { title: 'Thu tiền thanh toán', sub: 'Cập nhật thanh toán khách hàng', sheet: 'Nợ khách' },
   'khach-hang': { title: 'Quản lý khách hàng', sub: 'Thêm và xem danh sách KH', sheet: 'Danh mục KH' },
+  'lich-su': { title: 'Lịch sử phiếu', sub: 'Tìm kiếm & tra cứu phiếu cũ', sheet: '' },
+  'ton-kho': { title: 'Quản lý tồn kho', sub: 'Tồn vải mộc & vải thành phẩm', sheet: '' },
+  'bao-cao': { title: 'Báo cáo kinh doanh', sub: 'Doanh thu, sản lượng & công nợ', sheet: '' },
   'cai-dat': { title: 'Cài đặt kết nối', sub: 'Cấu hình Google Sheets API', sheet: '' },
 };
 

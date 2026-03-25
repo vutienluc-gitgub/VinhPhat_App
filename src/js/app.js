@@ -9,6 +9,9 @@ import { syncItemFormToActive, renderXkTabs } from './xk-items.js';
 import { renderPhieu } from './phieu.js';
 import { loadConfig } from './settings.js';
 import { initEvents } from './init-events.js';
+import { initHistory } from './history.js';
+import { initTonKho } from './tonkho.js';
+import { initBaoCao } from './baocao.js';
 
 // ── Init ──
 const today = new Date().toISOString().split('T')[0];
@@ -32,6 +35,9 @@ updateKhId();
 
 // Bind all events (replaces inline handlers)
 initEvents();
+initHistory();
+initTonKho();
+initBaoCao();
 
 setTimeout(function () {
   STATE.xk.rolls = STATE.xk.items[0].rolls;

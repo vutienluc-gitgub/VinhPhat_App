@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="src/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -60,6 +61,32 @@
             <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
           </svg>
           <span>Khách hàng</span>
+        </button>
+        <div class="nav-section">Tra cứu</div>
+        <button class="nav-item" data-page="lich-su" id="nav-lich-su">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 8v4l3 3" />
+            <circle cx="12" cy="12" r="10" />
+          </svg>
+          <span>Lịch sử phiếu</span>
+        </button>
+        <button class="nav-item" data-page="ton-kho" id="nav-ton-kho">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
+          </svg>
+          <span>Tồn kho</span>
+          <span id="tonkho-nav-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:auto;line-height:16px">0</span>
+        </button>
+        <div class="nav-section">Phân tích</div>
+        <button class="nav-item" data-page="bao-cao" id="nav-bao-cao">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          <span>Báo cáo</span>
         </button>
         <div class="nav-section">Cài đặt</div>
         <button class="nav-item" data-page="cai-dat" id="nav-cai-dat">
@@ -774,6 +801,294 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE · LỊCH SỬ PHIẾU
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-lich-su">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📅 Lịch sử phiếu</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span id="history-count" style="font-size:12px;color:var(--muted)"></span>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Filter bar -->
+            <div class="history-filter-bar">
+              <div class="form-group">
+                <label class="form-label">Loại phiếu</label>
+                <select class="form-control" id="history-type" style="min-width:150px">
+                  <option value="all">— Tất cả loại —</option>
+                  <option value="nvm">Nhập vải mộc</option>
+                  <option value="vtp">Vải thành phẩm</option>
+                  <option value="xk">Xuất kho</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" id="history-from">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" id="history-to">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Khách hàng</label>
+                <select class="form-control" id="history-kh" style="min-width:160px">
+                  <option value="">— Tất cả khách hàng —</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" class="form-control" id="history-search"
+                  placeholder="ID, tên hàng, nhà dệt..." style="min-width:200px">
+              </div>
+              <div class="form-group" style="align-self:flex-end">
+                <button class="btn btn-primary" id="history-btn-load">
+                  🔍 Tải dữ liệu
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="history-loading"
+              style="display:none;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--muted);font-size:13px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="animation:spin 1s linear infinite">
+                <path d="M21 12a9 9 0 11-6.219-8.56" />
+              </svg>
+              Đang tải dữ liệu...
+            </div>
+
+            <!-- Empty state -->
+            <div id="history-empty" class="history-empty" style="display:flex">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                <rect x="9" y="3" width="6" height="4" rx="1" />
+              </svg>
+              <span>Chưa có dữ liệu — nhấn <strong>Tải dữ liệu</strong> để tra cứu</span>
+            </div>
+
+            <!-- Bảng kết quả -->
+            <div id="history-table-wrap" style="display:none;overflow-x:auto">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Mã phiếu</th>
+                    <th>Loại</th>
+                    <th>Ngày</th>
+                    <th>Tên hàng</th>
+                    <th>Thông tin</th>
+                    <th style="text-align:right">Số cây</th>
+                    <th style="text-align:right">Tổng cân</th>
+                    <th style="text-align:right">Tiền</th>
+                  </tr>
+                </thead>
+                <tbody id="history-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 5b · TỒN KHO
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-ton-kho">
+        <!-- Summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:16px">
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tổng cây tồn (TP)</div>
+            <div id="tonkho-total-cay" style="font-size:26px;font-weight:700;color:var(--primary);margin-top:4px">—</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tổng cân tồn (TP)</div>
+            <div id="tonkho-total-can" style="font-size:26px;font-weight:700;color:#1a7f5a;margin-top:4px">—</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Sắp hết hàng</div>
+            <div id="tonkho-low-count" style="font-size:26px;font-weight:700;color:var(--accent);margin-top:4px">—</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Hết hàng</div>
+            <div id="tonkho-het-count" style="font-size:26px;font-weight:700;color:var(--red);margin-top:4px">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📦 Tồn kho vải</div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn-primary" id="tonkho-btn-load">⟳ Tải dữ liệu</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Loading -->
+            <div id="tonkho-loading" style="display:none;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--muted);font-size:13px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">
+                <path d="M21 12a9 9 0 11-6.219-8.56" />
+              </svg>
+              Đang tải dữ liệu...
+            </div>
+
+            <!-- Content -->
+            <div id="tonkho-content">
+              <!-- Bảng vải mộc -->
+              <div style="margin-bottom:28px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <h3 style="font-size:13px;font-weight:700;color:var(--text);margin:0">🧵 Tồn vải mộc (NVM)</h3>
+                  <span id="tonkho-nvm-count" style="font-size:11px;color:var(--muted)"></span>
+                </div>
+                <div style="overflow-x:auto">
+                  <table class="history-table">
+                    <thead>
+                      <tr>
+                        <th>Tên hàng</th>
+                        <th>Mã hàng</th>
+                        <th>Màu</th>
+                        <th style="text-align:right">Số cây</th>
+                        <th style="text-align:right">Tổng cân</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tonkho-nvm-tbody">
+                      <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Nhấn Tải dữ liệu để xem</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Bảng vải TP -->
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <h3 style="font-size:13px;font-weight:700;color:var(--text);margin:0">🎨 Tồn vải thành phẩm (TP − Xuất kho)</h3>
+                  <span id="tonkho-vtp-count" style="font-size:11px;color:var(--muted)"></span>
+                </div>
+                <div style="overflow-x:auto">
+                  <table class="history-table">
+                    <thead>
+                      <tr>
+                        <th>Tên hàng</th>
+                        <th>Mã hàng</th>
+                        <th>Khổ</th>
+                        <th style="text-align:right">Nhập (cây / kg)</th>
+                        <th style="text-align:right">Xuất (cây / kg)</th>
+                        <th style="text-align:right">Tồn (cây / kg)</th>
+                        <th>Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tonkho-vtp-tbody">
+                      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nhấn Tải dữ liệu để xem</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 5c · BÁO CÁO
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-bao-cao">
+        <!-- Summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:16px">
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Doanh thu (năm)</div>
+            <div id="baocao-sum-dt" style="font-size:22px;font-weight:700;color:var(--primary);margin-top:4px">—</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Sản lượng TP</div>
+            <div id="baocao-sum-sl" style="font-size:22px;font-weight:700;color:#1a7f5a;margin-top:4px">—</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tổng công nợ</div>
+            <div id="baocao-sum-no" style="font-size:22px;font-weight:700;color:var(--red);margin-top:4px">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 Báo cáo kinh doanh</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn btn-primary" id="baocao-btn-load">↺ Tải báo cáo</button>
+              <button class="btn btn-print" id="baocao-btn-print">🖶 In báo cáo</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Filter bar -->
+            <div class="baocao-filter-bar">
+              <div class="form-group">
+                <label class="form-label">Năm</label>
+                <select class="form-control" id="baocao-year" style="min-width:100px">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kỳ thống kê</label>
+                <select class="form-control" id="baocao-period" style="min-width:140px">
+                  <option value="month" selected>Theo tháng</option>
+                  <option value="quarter">Theo quý</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="baocao-loading" style="display:none;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--muted);font-size:13px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">
+                <path d="M21 12a9 9 0 11-6.219-8.56" />
+              </svg>
+              Đang tải dữ liệu...
+            </div>
+
+            <!-- Content -->
+            <div id="baocao-content" style="display:none">
+              <!-- Biểu đồ 2 cột -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+                <div class="chart-card">
+                  <div class="chart-card-title">💰 Doanh thu xuất kho (VND)</div>
+                  <div class="chart-wrap">
+                    <canvas id="chart-doanh-thu"></canvas>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div class="chart-card-title">🧵 Sản lượng vải thành phẩm (cây)</div>
+                  <div class="chart-wrap">
+                    <canvas id="chart-san-luong"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bảng công nợ -->
+              <div class="chart-card">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                  <div class="chart-card-title" style="margin:0">📊 Công nợ khách hàng (Top 10)</div>
+                  <span id="baocao-no-count" style="font-size:11px;color:var(--muted)"></span>
+                </div>
+                <div style="overflow-x:auto">
+                  <table class="history-table">
+                    <thead>
+                      <tr>
+                        <th style="width:36px">#</th>
+                        <th>Khách hàng</th>
+                        <th style="text-align:right">Tổng tiền hàng</th>
+                        <th style="text-align:right">Đã thanh toán</th>
+                        <th style="text-align:right">Còn nợ</th>
+                      </tr>
+                    </thead>
+                    <tbody id="baocao-no-tbody">
+                      <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Nhấn Tải báo cáo để xem</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>

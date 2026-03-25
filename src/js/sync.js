@@ -3,11 +3,18 @@
 import { STATE, SYNC } from './state.js';
 import { escapeHtml, safeText, fmtNum } from './utils.js';
 import { updateKhId } from './id-gen.js';
+import { updateHistoryKhFilter } from './history.js';
+import { renderTonKho } from './tonkho.js';
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_MS = 2000;
+let _retryCount = 0;
 
 /** Start polling sync with Google Sheets (30s interval) */
 export function startSync() {
   const url = localStorage.getItem('vp_sheet_url');
   if (!url) return;
+  _retryCount = 0;
   syncFromSheets();
   if (SYNC.interval) clearInterval(SYNC.interval);
   SYNC.interval = setInterval(syncFromSheets, SYNC.polling);
@@ -30,6 +37,7 @@ export async function syncFromSheets() {
   try {
     const fetchUrl = url.split('?')[0] + '?action=getAll&_t=' + Date.now();
     const res = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     let data;
     try {
@@ -42,12 +50,16 @@ export async function syncFromSheets() {
     if (data.khachHang && data.khachHang.length) {
       updateKhDropdowns(data.khachHang);
       updateKhTable(data.khachHang);
+      updateHistoryKhFilter(data.khachHang);
     }
     if (data.ncc && data.ncc.length) {
       updateNccDropdowns(data.ncc);
     }
     if (data.noKhach) {
       SYNC.noKhach = data.noKhach;
+    }
+    if (data.tonKho) {
+      renderTonKho(data.tonKho);
     }
     if (data.seq) {
       SYNC.seq = data.seq;
@@ -60,11 +72,18 @@ export async function syncFromSheets() {
 
     SYNC.lastTs = data.ts || Date.now();
     SYNC.connected = true;
+    _retryCount = 0;
     setSyncStatus('ok');
   } catch (err) {
     SYNC.connected = false;
     setSyncStatus('error');
     console.warn('Sync error:', err.message);
+    if (_retryCount < MAX_RETRIES) {
+      _retryCount++;
+      const delay = RETRY_BASE_MS * Math.pow(2, _retryCount - 1);
+      console.warn(`Sync retry ${_retryCount}/${MAX_RETRIES} in ${delay}ms`);
+      setTimeout(syncFromSheets, delay);
+    }
   } finally {
     SYNC.isLoading = false;
   }
