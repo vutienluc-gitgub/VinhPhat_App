@@ -1,0 +1,1179 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Vĩnh Phát — Nhập liệu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="src/css/styles.css">
+</head>
+
+<body>
+  <div id="toast-container"></div>
+  <div id="print-frame" style="display:none"></div>
+
+  <div class="app">
+    <!-- ══ SIDEBAR ══ -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">Dệt May</div>
+        <div class="logo-name">Vĩnh Phát</div>
+        <div class="logo-sub">Quản lý sản xuất</div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">Nhập liệu</div>
+        <button class="nav-item active" data-page="nhap-moc" id="nav-nhap-moc">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+            <path d="M12 12h.01" />
+          </svg>
+          <span>Nhập vải mộc</span>
+        </button>
+        <button class="nav-item" data-page="vai-tp" id="nav-vai-tp">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12l2 2 4-4" />
+          </svg>
+          <span>Vải thành phẩm</span>
+        </button>
+        <button class="nav-item" data-page="xuat-kho" id="nav-xuat-kho">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <span>Xuất kho</span>
+        </button>
+        <button class="nav-item" data-page="thu-tien" id="nav-thu-tien">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          <span>Thu tiền</span>
+        </button>
+        <button class="nav-item" data-page="khach-hang" id="nav-khach-hang">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+          </svg>
+          <span>Khách hàng</span>
+        </button>
+        <div class="nav-section">Cài đặt</div>
+        <button class="nav-item" data-page="cai-dat" id="nav-cai-dat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+          <span>Cài đặt</span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div class="gs-status">
+          <div class="gs-dot" id="gs-dot"></div>
+          <span id="gs-status-text">Chưa kết nối</span>
+        </div>
+        <div style="font-size:9px;color:rgba(255,255,255,.2);margin-top:4px;display:flex;align-items:center;gap:4px">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span id="gs-sync-ts">—</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ══ MAIN ══ -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title" id="topbar-title">Nhập vải mộc</div>
+          <div class="topbar-sub" id="topbar-sub">Tạo lô nhập mới từ nhà dệt</div>
+        </div>
+        <div class="topbar-right">
+          <span id="sheet-name-badge"
+            style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace"></span>
+          <button class="btn btn-outline btn-sm" data-page="cai-dat">⚙ Cài đặt</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 1 · NHẬP VẢI MỘC
+════════════════════════════════════════════ -->
+      <div class="page active content" id="page-nhap-moc">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+          <!-- Form bên trái -->
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header">
+                <div class="card-title">📋 Thông tin lô hàng</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:11px;color:var(--muted)">ID:</span>
+                  <span id="nvm-id-preview"
+                    style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);font-weight:500"></span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="form-grid form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Ngày nhập <span>*</span></label>
+                    <input type="date" class="form-control" id="nvm-ngay">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Nhà dệt <span>*</span></label>
+                    <select class="form-control" id="nvm-det">
+                      <option value="">— Chọn nhà dệt —</option>
+                      <option>Huỳnh Đặng</option>
+                      <option>Trần Ân Nhân</option>
+                      <option>Anh khoa</option>
+                      <option>Sues</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Nhà nhuộm dự kiến</label>
+                    <select class="form-control" id="nvm-nhuom">
+                      <option value="">— Chọn nhà nhuộm —</option>
+                      <option>Trang Kiểm</option>
+                      <option>Minh Đạt</option>
+                      <option>Sắc Màu</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tên sản phẩm <span>*</span></label>
+                    <select class="form-control" id="nvm-hang">
+                      <option value="">— Chọn tên hàng —</option>
+                      <option>CHÂN CUA PE XÁM</option>
+                      <option>CHÂN CUA TC ĐEN</option>
+                      <option>CHÂN CUA TC XÁM</option>
+                      <option>CHÂN CUA TC NAVY</option>
+                      <option>BO GÂN 2x1 XÁM</option>
+                      <option>BO GÂN 2x1 MELANG</option>
+                      <option>HAI DA PE MELANGE</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Giá dệt (₫/kg)</label>
+                    <input type="number" class="form-control" id="nvm-gia-det" placeholder="7000" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Loại máy dệt</label>
+                    <input type="number" class="form-control" id="nvm-may" placeholder="3020">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Trọng lượng mộc (g/m²)</label>
+                    <input type="number" class="form-control" id="nvm-tlmoc" placeholder="400">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Xe vận chuyển</label>
+                    <select class="form-control" id="nvm-xe">
+                      <option value="">— Không có —</option>
+                      <option>50E - 31929</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bảng từng cây -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">🧵 Danh sách cây vải</div>
+                <div style="font-size:12px;color:var(--muted)" id="nvm-roll-count">0 cây</div>
+              </div>
+              <div class="card-body" style="padding:0">
+                <div class="roll-wrap">
+                  <div class="roll-header">
+                    <span>No.</span>
+                    <span>●</span>
+                    <span style="text-align:right">KG&nbsp;<small
+                        style="opacity:.5;font-weight:400">205=20.5</small></span>
+                    <span style="text-align:right">RỘNG (CM)</span>
+                    <span></span>
+                  </div>
+                  <div class="roll-body" id="nvm-rolls"></div>
+                </div><!-- /roll-wrap -->
+                <div class="roll-controls">
+                  <span class="roll-controls-label">Thêm:</span>
+                  <button class="rc-btn" data-roll-action="add" data-type="nvm" data-count="1">+1</button>
+                  <button class="rc-btn" data-roll-action="add" data-type="nvm" data-count="5">+5</button>
+                  <button class="rc-btn" data-roll-action="add" data-type="nvm" data-count="10">+10</button>
+                  <span style="width:1px;height:18px;background:var(--border);margin:0 2px"></span>
+                  <span class="roll-controls-label">Bớt:</span>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="nvm" data-count="1">−1</button>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="nvm" data-count="5">−5</button>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="nvm" data-count="10">−10</button>
+                  <button class="rc-btn reset-btn" data-roll-action="reset" data-type="nvm">↺ Reset</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tóm tắt bên phải -->
+          <div style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Tóm tắt lô</div>
+              </div>
+              <div class="card-body">
+                <div class="roll-summary" style="flex-direction:column;gap:14px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                    <div class="roll-stat">
+                      <div class="roll-stat-val" id="nvm-total-cay">0</div>
+                      <div class="roll-stat-lbl">Tổng cây</div>
+                    </div>
+                    <div class="roll-stat">
+                      <div class="roll-stat-val" id="nvm-total-kg">0.0</div>
+                      <div class="roll-stat-lbl">Tổng kg</div>
+                    </div>
+                  </div>
+                  <div
+                    style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-size:12px;color:rgba(255,255,255,.5)">Nợ dệt dự tính</span>
+                    <span
+                      style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent)"
+                      id="nvm-no-det">—</span>
+                  </div>
+                </div>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                  <button class="btn btn-success" data-submit="nvm"
+                    style="width:100%;justify-content:center;font-size:14px;padding:11px">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Lưu lô nhập mộc
+                  </button>
+                  <button class="btn btn-outline btn-sm" data-reset="nvm"
+                    style="width:100%;justify-content:center">
+                    Xóa trắng
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">💡 Hướng dẫn</div>
+              </div>
+              <div class="card-body" style="font-size:12px;color:var(--muted);line-height:1.7">
+                <p>1. Điền thông tin lô hàng bên trái</p>
+                <p style="margin-top:6px">2. Nhấn <strong style="color:var(--sky)">Thêm cây</strong> để nhập kg từng cây
+                </p>
+                <p style="margin-top:6px">3. Mã cây tự động: <code>NVM-YYYY-NNN-C01</code></p>
+                <p style="margin-top:6px">4. Nhấn <strong style="color:var(--green)">Lưu</strong> để ghi vào Google
+                  Sheets</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 2 · VẢI THÀNH PHẨM
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-vai-tp">
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header">
+                <div class="card-title">🎨 Nhập vải thành phẩm</div>
+                <span id="vtp-id-preview"
+                  style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);font-weight:500"></span>
+              </div>
+              <div class="card-body">
+                <div class="form-grid form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Ngày nhập TP <span>*</span></label>
+                    <input type="date" class="form-control" id="vtp-ngay">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Lô nhập mộc tương ứng</label>
+                    <input type="text" class="form-control" id="vtp-lot-moc" placeholder="NVM-2026-001">
+                    <span class="form-hint">Nhập mã lô mộc đã xuất đi nhuộm</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Nhà dệt</label>
+                    <select class="form-control" id="vtp-det">
+                      <option value="">— Chọn —</option>
+                      <option>Huỳnh Đặng</option>
+                      <option>Trần Ân Nhân</option>
+                      <option>Anh khoa</option>
+                      <option>Sues</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Nhà nhuộm <span>*</span></label>
+                    <select class="form-control" id="vtp-nhuom">
+                      <option value="">— Chọn nhà nhuộm —</option>
+                      <option>Trang Kiểm</option>
+                      <option>Minh Đạt</option>
+                      <option>Sắc Màu</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tên hàng <span>*</span></label>
+                    <select class="form-control" id="vtp-hang">
+                      <option value="">— Chọn tên hàng —</option>
+                      <option>CHÂN CUA PE XÁM</option>
+                      <option>CHÂN CUA TC ĐEN</option>
+                      <option>CHÂN CUA TC XÁM</option>
+                      <option>CHÂN CUA TC NAVY</option>
+                      <option>BO GÂN 2x1 XÁM</option>
+                      <option>BO GÂN 2x1 MELANG</option>
+                      <option>BO GÂN 2x1 OE - ĐEN</option>
+                      <option>HAI DA PE MELANGE</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Giá nhuộm (₫/kg) <span>*</span></label>
+                    <input type="number" class="form-control" id="vtp-gia-nhuom" placeholder="9000">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Xe vận chuyển</label>
+                    <select class="form-control" id="vtp-xe">
+                      <option value="">— Không có —</option>
+                      <option>50E - 31929</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">🧵 Danh sách cây thành phẩm</div>
+                <div style="font-size:12px;color:var(--muted)" id="vtp-roll-count">0 cây</div>
+              </div>
+              <div class="card-body" style="padding:0">
+                <div class="roll-wrap">
+                  <div class="roll-header">
+                    <span>No.</span>
+                    <span>●</span>
+                    <span style="text-align:right">KG&nbsp;<small
+                        style="opacity:.5;font-weight:400">205=20.5</small></span>
+                    <span style="text-align:right">TIỀN/CÂY</span>
+                    <span></span>
+                  </div>
+                  <div class="roll-body" id="vtp-rolls"></div>
+                </div><!-- /roll-wrap -->
+                <div class="roll-controls">
+                  <span class="roll-controls-label">Thêm:</span>
+                  <button class="rc-btn" data-roll-action="add" data-type="vtp" data-count="1">+1</button>
+                  <button class="rc-btn" data-roll-action="add" data-type="vtp" data-count="5">+5</button>
+                  <button class="rc-btn" data-roll-action="add" data-type="vtp" data-count="10">+10</button>
+                  <span style="width:1px;height:18px;background:var(--border);margin:0 2px"></span>
+                  <span class="roll-controls-label">Bớt:</span>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="vtp" data-count="1">−1</button>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="vtp" data-count="5">−5</button>
+                  <button class="rc-btn minus" data-roll-action="remove" data-type="vtp" data-count="10">−10</button>
+                  <button class="rc-btn reset-btn" data-roll-action="reset" data-type="vtp">↺ Reset</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Tóm tắt</div>
+              </div>
+              <div class="card-body">
+                <div class="roll-summary" style="flex-direction:column;gap:14px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                    <div class="roll-stat">
+                      <div class="roll-stat-val" id="vtp-total-cay">0</div>
+                      <div class="roll-stat-lbl">Tổng cây</div>
+                    </div>
+                    <div class="roll-stat">
+                      <div class="roll-stat-val" id="vtp-total-kg">0.0</div>
+                      <div class="roll-stat-lbl">Tổng kg TP</div>
+                    </div>
+                  </div>
+                  <div
+                    style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-size:12px;color:rgba(255,255,255,.5)">Nợ nhuộm</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#ff7675"
+                      id="vtp-no-nhuom">—</span>
+                  </div>
+                </div>
+                <button class="btn btn-success" data-submit="vtp"
+                  style="width:100%;justify-content:center;margin-top:16px;font-size:14px;padding:11px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Lưu vải thành phẩm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 3 · XUẤT KHO
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-xuat-kho">
+        <div style="display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start">
+
+          <!-- ── CỘT TRÁI ── -->
+          <div style="display:flex;flex-direction:column;gap:14px">
+
+            <!-- Thông tin phiếu -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📦 Thông tin phiếu xuất</div>
+                <span id="xk-id-preview"
+                  style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);font-weight:600"></span>
+              </div>
+              <div class="card-body">
+                <div class="form-grid form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Ngày xuất <span>*</span></label>
+                    <input type="date" class="form-control" id="xk-ngay">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Khách hàng <span>*</span></label>
+                    <select class="form-control" id="xk-kh">
+                      <option value="">— Chọn khách hàng —</option>
+                      <option>Lê Chí Linh</option>
+                      <option>Lê Xuân Huy</option>
+                      <option>Nguyễn Thị Thắm</option>
+                      <option>Nguyễn Chí Thọ</option>
+                      <option>Nguyễn Quốc Khánh</option>
+                      <option>Nguyễn Thị Kim Ngân</option>
+                      <option>Phạm Thị Oanh</option>
+                      <option>Trần Kiên Danh</option>
+                      <option>Vũ Thị Phương</option>
+                      <option>Trần Đức Sỹ</option>
+                      <option>Nguyễn Văn Cường</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Xe vận chuyển</label>
+                    <select class="form-control" id="xk-xe">
+                      <option value="">— Không có —</option>
+                      <option>50E - 31929</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Trạng thái thanh toán</label>
+                    <select class="form-control" id="xk-tt">
+                      <option value="Chưa thanh toán">Chưa thanh toán</option>
+                      <option value="Đã thanh toán">Đã thanh toán</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="grid-column:1/-1">
+                    <label class="form-label">Ghi chú</label>
+                    <input type="text" class="form-control" id="xk-ghi-chu" placeholder="VD: Hàng giao tại kho...">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs mặt hàng -->
+            <div class="card">
+              <div class="card-header" style="padding:10px 14px">
+                <div class="card-title">🧵 Mặt hàng</div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div id="xk-item-tabs" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+                  <button id="btn-add-xk-item"
+                    style="width:28px;height:28px;border-radius:50%;background:var(--sky);color:#fff;border:none;cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0"
+                    title="Thêm mặt hàng">+</button>
+                </div>
+              </div>
+              <div class="card-body" style="padding:14px">
+                <!-- Form mặt hàng active -->
+                <div class="form-grid form-grid-2" style="margin-bottom:14px">
+                  <div class="form-group">
+                    <label class="form-label">Tên hàng <span>*</span></label>
+                    <select class="form-control" id="xk-item-hang">
+                      <option value="">— Chọn tên hàng —</option>
+                      <option>CHÂN CUA PE XÁM</option>
+                      <option>CHÂN CUA TC ĐEN</option>
+                      <option>CHÂN CUA TC XÁM</option>
+                      <option>CHÂN CUA TC NAVY</option>
+                      <option>BO GÂN 2x1 XÁM</option>
+                      <option>BO GÂN 2x1 MELANG</option>
+                      <option>BO GÂN 2x1 OE - ĐEN</option>
+                      <option>HAI DA PE MELANGE</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Đơn giá (₫/kg)</label>
+                    <input type="number" class="form-control" id="xk-item-gia" placeholder="72000">
+                  </div>
+                  <!-- Hiển thị thông tin hàng hóa từ HANG_DATA -->
+                  <div class="form-group" style="grid-column:1/-1">
+                    <div id="xk-item-info"
+                      style="display:none;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bảng cây -->
+                <div style="border-top:1px solid var(--border);padding-top:12px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <span style="font-size:12px;font-weight:600;color:var(--navy)">Danh sách cây</span>
+                    <div style="font-size:12px;color:var(--muted)" id="xk-roll-count">0/50</div>
+                  </div>
+                  <div class="roll-wrap">
+                    <div class="roll-header">
+                      <span>No.</span><span>●</span>
+                      <span style="text-align:right">KG&nbsp;<small
+                          style="opacity:.5;font-weight:400">205=20.5</small></span>
+                      <span style="text-align:right">TIỀN/CÂY</span>
+                      <span></span>
+                    </div>
+                    <div class="roll-body" id="xk-rolls"></div>
+                  </div>
+                  <div class="roll-controls">
+                    <span class="roll-controls-label">Thêm:</span>
+                    <button class="rc-btn" data-roll-action="add" data-type="xk" data-count="1">+1</button>
+                    <button class="rc-btn" data-roll-action="add" data-type="xk" data-count="5">+5</button>
+                    <button class="rc-btn" data-roll-action="add" data-type="xk" data-count="10">+10</button>
+                    <span class="rc-sep"></span>
+                    <span class="roll-controls-label">Bớt:</span>
+                    <button class="rc-btn minus" data-roll-action="remove" data-type="xk" data-count="1">−1</button>
+                    <button class="rc-btn minus" data-roll-action="remove" data-type="xk" data-count="5">−5</button>
+                    <button class="rc-btn minus" data-roll-action="remove" data-type="xk" data-count="10">−10</button>
+                    <button class="rc-btn reset-btn" data-roll-action="reset" data-type="xk">↺ Reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-success" data-submit="xk"
+              style="width:100%;justify-content:center;font-size:14px;padding:13px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Lưu vào Google Sheets
+            </button>
+          </div>
+
+          <!-- ── CỘT PHẢI: Preview ── -->
+          <div style="position:sticky;top:78px">
+            <div class="phieu-wrap phieu-print-card" id="phieu-preview"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 4 · THU TIỀN
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-thu-tien">
+        <div style="max-width:640px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💰 Cập nhật thanh toán khách hàng</div>
+            </div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Khách hàng <span>*</span></label>
+                  <select class="form-control" id="tt-kh">
+                    <option value="">— Chọn khách hàng —</option>
+                    <option>Lê Chí Linh</option>
+                    <option>Lê Xuân Huy</option>
+                    <option>Nguyễn Thị Thắm</option>
+                    <option>Nguyễn Chí Thọ</option>
+                    <option>Nguyễn Quốc Khánh</option>
+                    <option>Nguyễn Thị Kim Ngân</option>
+                    <option>Phạm Thị Oanh</option>
+                    <option>Trần Kiên Danh</option>
+                    <option>Vũ Thị Phương</option>
+                    <option>Trần Đức Sỹ</option>
+                    <option>Nguyễn Văn Cường</option>
+                  </select>
+                </div>
+                <div id="tt-debt-info"
+                  style="display:none;background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:14px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span style="font-size:12px;color:var(--muted)">Tổng tiền đã mua</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600"
+                      id="tt-tong-mua">—</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span style="font-size:12px;color:var(--muted)">Đã thanh toán</span>
+                    <span
+                      style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--green)"
+                      id="tt-da-tt">—</span>
+                  </div>
+                  <div
+                    style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-size:13px;font-weight:700">Còn nợ</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--red)"
+                      id="tt-con-no">—</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ngày thu <span>*</span></label>
+                  <input type="date" class="form-control" id="tt-ngay">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Số tiền thu (₫) <span>*</span></label>
+                  <input type="number" class="form-control" id="tt-so-tien" placeholder="0">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hình thức thanh toán</label>
+                  <select class="form-control" id="tt-hinh-thuc">
+                    <option value="Chuyển khoản">Chuyển khoản</option>
+                    <option value="Tiền mặt">Tiền mặt</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ghi chú</label>
+                  <input type="text" class="form-control" id="tt-ghi-chu"
+                    placeholder="VD: Thanh toán đơn PXK-VTP-015...">
+                </div>
+                <div id="tt-remaining"
+                  style="display:none;padding:12px;border-radius:8px;font-size:13px;font-weight:500;text-align:center">
+                </div>
+              </div>
+              <div style="margin-top:20px;display:flex;gap:10px">
+                <button class="btn btn-success" data-submit="tt"
+                  style="flex:1;justify-content:center;font-size:14px;padding:11px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Lưu thanh toán
+                </button>
+                <button class="btn btn-outline" data-reset="tt">Xóa trắng</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 5 · KHÁCH HÀNG
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-khach-hang">
+        <div style="max-width:640px">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <div class="card-title">👥 Thêm khách hàng mới</div>
+              <span id="kh-id-preview"
+                style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);font-weight:500"></span>
+            </div>
+            <div class="card-body">
+              <div class="form-grid form-grid-2">
+                <div class="form-group" style="grid-column:1/-1">
+                  <label class="form-label">Tên khách hàng <span>*</span></label>
+                  <input type="text" class="form-control" id="kh-ten" placeholder="Nhập họ tên đầy đủ">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Người phụ trách</label>
+                  <input type="text" class="form-control" id="kh-phu-trach" value="Vũ Tiến Lực">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Số điện thoại</label>
+                  <input type="tel" class="form-control" id="kh-sdt" placeholder="0xxx xxx xxx">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="kh-email" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Địa chỉ</label>
+                  <input type="text" class="form-control" id="kh-dia-chi" placeholder="Địa chỉ giao hàng">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ngày thêm</label>
+                  <input type="date" class="form-control" id="kh-ngay">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ghi chú</label>
+                  <input type="text" class="form-control" id="kh-ghi-chu" placeholder="Ghi chú thêm">
+                </div>
+              </div>
+              <div style="margin-top:20px;display:flex;gap:10px">
+                <button class="btn btn-success" data-submit="kh"
+                  style="flex:1;justify-content:center;font-size:14px;padding:11px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Thêm khách hàng
+                </button>
+                <button class="btn btn-outline" data-reset="kh">Xóa trắng</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danh sách KH -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Danh sách khách hàng hiện tại</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên khách hàng</th>
+                    <th>Phụ trách</th>
+                  </tr>
+                </thead>
+                <tbody id="kh-table-body">
+                  <tr>
+                    <td>KH-001</td>
+                    <td>Lê Chí Linh</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-002</td>
+                    <td>Lê Xuân Huy</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-003</td>
+                    <td>Nguyễn Thị Thắm</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-004</td>
+                    <td>Nguyễn Chí Thọ</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-005</td>
+                    <td>Nguyễn Quốc Khánh</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-006</td>
+                    <td>Nguyễn Thị Kim Ngân</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-007</td>
+                    <td>Phạm Thị Oanh</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-008</td>
+                    <td>Trần Kiên Danh</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-009</td>
+                    <td>Vũ Thị Phương</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-010</td>
+                    <td>Trần Đức Sỹ</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                  <tr>
+                    <td>KH-011</td>
+                    <td>Nguyễn Văn Cường</td>
+                    <td>Vũ Tiến Lực</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+     PAGE 6 · CÀI ĐẶT
+════════════════════════════════════════════ -->
+      <div class="page content" id="page-cai-dat">
+        <div style="max-width:680px">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <div class="card-title">🔌 Kết nối Google Sheets</div>
+            </div>
+            <div class="card-body">
+              <div class="config-note" style="margin-bottom:16px">
+                <strong>⚠️ Cần cấu hình 1 lần trước khi dùng:</strong><br>
+                App này ghi dữ liệu trực tiếp vào Google Sheets của bạn qua Google Apps Script. Làm theo các bước bên
+                dưới để kết nối.
+              </div>
+
+              <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label">Web App URL (từ Google Apps Script)</label>
+                <input type="url" class="form-control" id="cfg-url"
+                  placeholder="https://script.google.com/macros/s/AKfy.../exec">
+                <span class="form-hint">Dán URL sau khi Deploy Google Apps Script</span>
+              </div>
+
+              <div class="form-group" style="margin-bottom:16px">
+                <label class="form-label">Spreadsheet ID (tùy chọn, để kiểm tra)</label>
+                <input type="text" class="form-control" id="cfg-sheet-id"
+                  placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+                <span class="form-hint">Lấy từ URL Google Sheets: .../spreadsheets/d/<strong>[ID ở
+                    đây]</strong>/edit</span>
+              </div>
+
+              <div class="form-group" style="margin-bottom:16px">
+                <label class="form-label">Tên người in phiếu</label>
+                <input type="text" class="form-control" id="cfg-nguoi-in"
+                  placeholder="Nhập tên người in (VD: HUONG)">
+                <span class="form-hint">Tên này sẽ xuất hiện trên góc phải Phiếu Xuất Kho</span>
+              </div>
+
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-primary" id="btn-test-conn">🔗 Kiểm tra kết nối</button>
+                <button class="btn btn-outline" id="btn-clear-config">Xóa cấu hình</button>
+              </div>
+
+              <div id="conn-result"
+                style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+              <div id="sync-status-panel"
+                style="display:none;margin-top:10px;background:var(--bg);border-radius:8px;padding:12px 14px">
+                <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px">📡 Realtime Sync</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+                  <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+                    <div style="color:var(--muted);margin-bottom:3px">Trạng thái</div>
+                    <div id="sync-state-badge" style="font-weight:600;color:var(--green)">—</div>
+                  </div>
+                  <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+                    <div style="color:var(--muted);margin-bottom:3px">Đồng bộ lần cuối</div>
+                    <div id="sync-last-time" style="font-family:'JetBrains Mono',monospace;font-weight:600">—</div>
+                  </div>
+                  <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+                    <div style="color:var(--muted);margin-bottom:3px">Khách hàng</div>
+                    <div id="sync-kh-count" style="font-weight:600;color:var(--navy)">—</div>
+                  </div>
+                  <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
+                    <div style="color:var(--muted);margin-bottom:3px">Polling</div>
+                    <div style="font-weight:600;color:var(--navy)">Mỗi 30 giây</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline btn-sm" id="btn-sync-now"
+                  style="margin-top:10px;width:100%;justify-content:center">
+                  🔄 Đồng bộ ngay
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <div class="card-title">📋 Hướng dẫn tạo Google Apps Script</div>
+            </div>
+            <div class="card-body">
+              <ol class="step-list">
+                <li>Mở Google Sheets → menu <strong>Extensions</strong> → <strong>Apps Script</strong></li>
+                <li>Xóa code cũ, dán <strong>toàn bộ code Apps Script</strong> bên dưới vào</li>
+                <li>Nhấn <strong>Save</strong> (Ctrl+S), đặt tên project bất kỳ</li>
+                <li>Nhấn <strong>Deploy</strong> → <strong>New deployment</strong></li>
+                <li>Chọn type = <strong>Web app</strong>, Execute as = <strong>Me</strong>, Who has access =
+                  <strong>Anyone</strong>
+                </li>
+                <li>Nhấn <strong>Deploy</strong> → copy URL → dán vào ô trên</li>
+                <li>Lần đầu sẽ hỏi quyền — nhấn <strong>Review permissions</strong> → Allow</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📄 Code Google Apps Script</div>
+              <button class="btn btn-outline btn-sm" id="btn-copy-script">📋 Copy code</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <pre id="gas-code"
+                style="background:#0f2744;color:#a8d8ff;padding:20px;border-radius:0 0 10px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;margin:0">// ================================================================
+// VĨNH PHÁT — Google Apps Script v2 (Realtime Sync)
+// ================================================================
+
+var SHEET_NAMES = {
+  nhapVaiMoc:   'Nhập vải mộc',
+  vaiThanhPham: 'Vải thành phẩm',
+  phieuXuatKho: 'Phiếu xuất kho',
+  noKhach:      'Nợ khách',
+  noNhuom:      'Nợ nhuộm',
+  noDet:        'Nợ dệt',
+  danhMucKH:    'Danh mục khách hàng',
+  danhMucNCC:   'Danh mục nhà cung cấp',
+  danhMucVai:   'Định mức',
+};
+
+// ── JSON response helper ──────────────────────────────────────
+// Lưu ý: Apps Script không hỗ trợ setHeader() trên TextOutput
+// CORS được xử lý tự động khi deploy với "Who has access: Anyone"
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── doGet: đọc dữ liệu từ Sheets ─────────────────────────────
+function doGet(e) {
+  // Guard: e có thể undefined khi test trong editor
+  var action = 'ping';
+  try {
+    if (e &amp;&amp; e.parameter &amp;&amp; e.parameter.action) {
+      action = e.parameter.action;
+    }
+  } catch(ignore) {}
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    switch (action) {
+      case 'ping':
+        return json({ ok: true, msg: 'Vĩnh Phát API v2 ✓', ts: Date.now() });
+      case 'getKH':
+        return json({ ok: true, data: getKhachHang(ss) });
+      case 'getNCC':
+        return json({ ok: true, data: getNCC(ss) });
+      case 'getNoKhach':
+        return json({ ok: true, data: getNoKhach(ss) });
+      case 'getTonKho':
+        return json({ ok: true, data: getTonKho(ss) });
+      case 'getSeq':
+        return json({ ok: true, data: getAllSeq(ss) });
+      case 'getAll':
+        return json({
+          ok:         true,
+          ts:         Date.now(),
+          khachHang:  getKhachHang(ss),
+          ncc:        getNCC(ss),
+          noKhach:    getNoKhach(ss),
+          tonKho:     getTonKho(ss),
+          seq:        getAllSeq(ss),
+        });
+      default:
+        return json({ ok: false, msg: 'Unknown action: ' + action });
+    }
+  } catch(err) {
+    return json({ ok: false, msg: 'doGet error: ' + err.message });
+  }
+}
+
+// ── doPost: ghi dữ liệu vào Sheets ───────────────────────────
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(15000);
+  try {
+    if (!e || !e.postData) return json({ ok: false, msg: 'No POST data received' });
+    var data = JSON.parse(e.postData.contents);
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var result;
+    switch (data.action) {
+      case 'nhapVaiMoc':   result = handleNhapVaiMoc(ss, data);  break;
+      case 'vaiThanhPham': result = handleVaiTP(ss, data);       break;
+      case 'xuatKho':      result = handleXuatKho(ss, data);     break;
+      case 'thuTien':      result = handleThuTien(ss, data);     break;
+      case 'themKH':       result = handleThemKH(ss, data);      break;
+      default: result = { ok: false, msg: 'Unknown action: ' + data.action };
+    }
+    return json(result);
+  } catch(err) {
+    return json({ ok: false, msg: err.message });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function nextSeq(ws) {
+  var last = ws.getLastRow();
+  if (last &lt; 2) return 1;
+  var vals = ws.getRange(2, 1, last - 1, 1).getValues();
+  var max = 0;
+  for (var i = 0; i &lt; vals.length; i++) {
+    var m = String(vals[i][0]).match(/(\d+)$/);
+    if (m) { var n = parseInt(m[1], 10); if (n &gt; max) max = n; }
+  }
+  return max + 1;
+}
+
+function pad(n, len) {
+  var s = String(n);
+  while (s.length &lt; len) s = '0' + s;
+  return s;
+}
+
+function sheetRows(ss, name) {
+  var ws = ss.getSheetByName(name);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  return ws.getRange(2, 1, ws.getLastRow() - 1, ws.getLastColumn()).getValues();
+}
+
+// ── GET handlers ─────────────────────────────────────────────
+function getKhachHang(ss) {
+  var rows = sheetRows(ss, SHEET_NAMES.danhMucKH);
+  return rows
+    .filter(function(r) { return r[0] &amp;&amp; r[2]; })
+    .map(function(r) {
+      return { id: r[0], ten: r[2], phuTrach: r[3] || '' };
+    });
+}
+
+function getNCC(ss) {
+  var rows = sheetRows(ss, SHEET_NAMES.danhMucNCC);
+  return rows
+    .filter(function(r) { return r[0] &amp;&amp; r[2]; })
+    .map(function(r) {
+      return { id: r[0], loai: r[1] || '', ten: r[2] };
+    });
+}
+
+function getNoKhach(ss) {
+  var ws = ss.getSheetByName(SHEET_NAMES.noKhach);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  var data = ws.getDataRange().getValues();
+  var result = [];
+  // Tìm header row
+  var tenCol = 2, tongCol = 5, daTTCol = 7;
+  for (var i = 1; i &lt; data.length; i++) {
+    var ten = String(data[i][tenCol] || '').trim();
+    if (!ten) continue;
+    var tong = parseFloat(data[i][tongCol]) || 0;
+    var daTT = parseFloat(data[i][daTTCol]) || 0;
+    result.push({ ten: ten, tongNo: tong, daTT: daTT, conNo: tong - daTT });
+  }
+  return result;
+}
+
+function getTonKho(ss) {
+  var ws = ss.getSheetByName(SHEET_NAMES.nhapVaiMoc);
+  if (!ws || ws.getLastRow() &lt; 2) return [];
+  // Đọc cột: ID, tenHang, tongCay, tongCan
+  var rows = ws.getRange(2, 1, ws.getLastRow() - 1, 12).getValues();
+  var result = [];
+  rows.forEach(function(r) {
+    if (r[0]) result.push({ lotId: r[0], tenHang: r[4] || '', tongCay: r[11] || 0, tongCan: r[10] || 0 });
+  });
+  return result;
+}
+
+function getAllSeq(ss) {
+  var seqs = {};
+  [
+    ['pxk', SHEET_NAMES.phieuXuatKho],
+    ['nvm', SHEET_NAMES.nhapVaiMoc],
+    ['vtp', SHEET_NAMES.vaiThanhPham],
+    ['kh',  SHEET_NAMES.danhMucKH],
+  ].forEach(function(pair) {
+    var ws = ss.getSheetByName(pair[1]);
+    seqs[pair[0]] = ws ? nextSeq(ws) : 1;
+  });
+  return seqs;
+}
+
+// ── POST handlers ─────────────────────────────────────────────
+function handleNhapVaiMoc(ss, d) {
+  var ws  = ss.getSheetByName(SHEET_NAMES.nhapVaiMoc);
+  var seq = nextSeq(ws);
+  var yr  = new Date().getFullYear();
+  var lotId = 'NVM-' + yr + '-' + pad(seq, 3);
+  var kgs = d.kgs || [];
+  var tongCan = 0;
+  for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
+  tongCan = Math.round(tongCan * 100) / 100;
+  var giaDet = parseFloat(d.giaDet) || 0;
+  var row = [lotId, d.ngay||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'',
+             d.loaiMay||'', d.tlMoc||'', d.xe||'',
+             Math.round(giaDet*tongCan), giaDet, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
+  ws.appendRow(row);
+  return { ok: true, lotId: lotId, tongCay: kgs.length, tongCan: tongCan };
+}
+
+function handleVaiTP(ss, d) {
+  var ws  = ss.getSheetByName(SHEET_NAMES.vaiThanhPham);
+  var seq = nextSeq(ws);
+  var yr  = new Date().getFullYear();
+  var id  = 'NVTP-' + yr + '-' + pad(seq, 3);
+  var kgs = d.kgs || [];
+  var tongCan = 0;
+  for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
+  tongCan = Math.round(tongCan * 100) / 100;
+  var giaNhuom = parseFloat(d.giaNhuom) || 0;
+  var row = [id, d.ngay||'', d.lotMoc||'', d.nhaDet||'', d.nhaNhuom||'', d.tenHang||'', d.xe||'',
+             Math.round(giaNhuom*tongCan), giaNhuom, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
+  ws.appendRow(row);
+  return { ok: true, id: id, tongCay: kgs.length, tongCan: tongCan };
+}
+
+function handleXuatKho(ss, d) {
+  var ws  = ss.getSheetByName(SHEET_NAMES.phieuXuatKho);
+  var seq = nextSeq(ws);
+  var id  = 'PXK-VTP-' + pad(seq, 3);
+  var kgs = d.kgs || [];
+  var tongCan = 0;
+  for (var i = 0; i &lt; kgs.length; i++) tongCan += parseFloat(kgs[i]) || 0;
+  tongCan = Math.round(tongCan * 100) / 100;
+  var donGia = parseFloat(d.donGia) || 0;
+  var row = [id, d.ngay||'', 'Xuat kho', d.khachHang||'', d.tenHang||'', d.xe||'',
+             d.trangThai||'Chua thanh toan', Math.round(donGia*tongCan), donGia, tongCan, kgs.length];
+  for (var j = 0; j &lt; kgs.length; j++) row.push(parseFloat(kgs[j])||0);
+  ws.appendRow(row);
+  return { ok: true, id: id, tongTien: Math.round(donGia*tongCan), tongCay: kgs.length, tongCan: tongCan };
+}
+
+function handleThuTien(ss, d) {
+  var ws   = ss.getSheetByName(SHEET_NAMES.noKhach);
+  var last = ws.getLastRow();
+  if (last &lt; 2) return { ok: false, msg: 'Sheet No khach chua co du lieu' };
+  var allData  = ws.getRange(1, 1, last, ws.getLastColumn()).getValues();
+  var tenKHCol = 2, daTTCol = 7, startRow = 2;
+  var foundHeader = false;
+  for (var i = 0; i &lt; allData.length; i++) {
+    for (var j = 0; j &lt; allData[i].length; j++) {
+      if (String(allData[i][j]).indexOf('KHÁCH HÀNG') !== -1) {
+        startRow = i + 2;
+        foundHeader = true;
+        break;
+      }
+    }
+    if (foundHeader) break;
+  }
+  var foundRow = -1;
+  for (var r = startRow - 1; r &lt; allData.length; r++)
+    if (String(allData[r][tenKHCol]||'').trim() === d.khachHang.trim()) { foundRow = r + 1; break; }
+  if (foundRow === -1) {
+    var newRow = ['','',d.khachHang,'','','','',parseFloat(d.soTien)||0,'',''];
+    ws.appendRow(newRow);
+    return { ok: true, khachHang: d.khachHang, daTT: parseFloat(d.soTien)||0 };
+  }
+  var cell = ws.getRange(foundRow, daTTCol + 1);
+  var newVal = (parseFloat(cell.getValue())||0) + (parseFloat(d.soTien)||0);
+  cell.setValue(newVal);
+  return { ok: true, khachHang: d.khachHang, daTT: newVal };
+}
+
+function handleThemKH(ss, d) {
+  var ws  = ss.getSheetByName(SHEET_NAMES.danhMucKH);
+  var seq = nextSeq(ws);
+  var id  = 'KH-' + pad(seq, 3);
+  ws.appendRow([id, d.ngay||'', d.ten||'', d.phuTrach||'Vu Tien Luc', '', '', '']);
+  return { ok: true, id: id, ten: d.ten };
+}
+</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <!-- ── MODAL XÁC NHẬN ── -->
+  <div class="modal-overlay" id="confirm-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="confirm-title">Xác nhận lưu</div>
+        <button class="modal-close" id="btn-modal-close">×</button>
+      </div>
+      <div class="modal-body" id="confirm-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btn-modal-cancel">Hủy</button>
+        <button class="btn btn-success" id="confirm-ok-btn">Xác nhận lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/js/app.js"></script>
+</body>
+
+</html>
