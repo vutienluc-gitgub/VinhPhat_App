@@ -9,6 +9,7 @@ import { syncFromSheets } from './sync.js';
 import { renderRolls } from './rolls.js';
 import { saveActiveItemFromForm, renderXkTabs } from './xk-items.js';
 import { renderPhieu } from './phieu.js';
+import { saveDraft, clearDraft, addToOutbox } from './idb.js';
 
 export function updateTtRemaining() {
   const el = document.getElementById('tt-remaining');
@@ -29,6 +30,8 @@ export function submitForm(type) {
   if (STATE.isSubmitting) return;
   const payload = buildPayload(type);
   if (!payload) return;
+  // Auto-save draft trước khi confirm (phòng trường hợp mất mạng hoặc thoát tab)
+  saveDraft(type, payload);
   const names = {
     nvm: 'lô vải mộc',
     vtp: 'vải thành phẩm',
@@ -351,6 +354,7 @@ export async function doSubmit(type, payload) {
           renderPhieu();
         }, 100);
       }
+      clearDraft(type); // xoá draft sau khi submit thành công
       resetForm(type);
       setTimeout(function () {
         syncFromSheets();
@@ -360,7 +364,14 @@ export async function doSubmit(type, payload) {
       toast('❌ Lỗi: ' + (data.msg || 'Không rõ'), 'error');
     }
   } catch (err) {
-    toast('❌ Lỗi hoặc không kết nối được Google Sheets. Kiểm tra URL và quyền.', 'error');
+    if (!navigator.onLine) {
+      // Mất mạng: lưu vào outbox để retry khi có mạng lại
+      addToOutbox(payload).then(function () {
+        toast('📥 Mất mạng — đã lưu vào hàng chờ, tự gửi khi có mạng lại.', 'warning');
+      });
+    } else {
+      toast('❌ Lỗi hoặc không kết nối được Google Sheets. Kiểm tra URL và quyền.', 'error');
+    }
     console.error(err);
   } finally {
     STATE.isSubmitting = false;

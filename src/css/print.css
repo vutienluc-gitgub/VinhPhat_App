@@ -1,0 +1,77 @@
+/* ================================================================
+   VĨNH PHÁT — Print Stylesheet
+   Linked with media="print" — all rules here apply only during printing.
+   No @media print wrapper needed since the stylesheet itself is print-only.
+================================================================ */
+
+/* ── Page defaults ─────────────────────────────────────────── */
+@page {
+  margin: 8mm 10mm;
+  size: A4 landscape;
+}
+
+/* ── Color accuracy ── */
+* {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* ── Always hidden ── */
+.sidebar,
+.topbar,
+#toast-container,
+.no-print,
+.phieu-actions {
+  display: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DEFAULT — Phiếu giao hàng
+   Phiếu is rendered in a new window via window.open().
+   The main window has nothing to show, so hide the app.
+════════════════════════════════════════════════════════════════ */
+body:not(.print-baocao) .app {
+  display: none !important;
+}
+
+body:not(.print-baocao) #print-frame {
+  display: block !important;
+  position: fixed;
+  inset: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BÁO CÁO MODE — body.print-baocao
+   Report is printed directly from the main window.
+════════════════════════════════════════════════════════════════ */
+body.print-baocao .main {
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+}
+
+body.print-baocao .page:not(#page-bao-cao) {
+  display: none !important;
+}
+
+body.print-baocao #page-bao-cao {
+  display: block !important;
+}
+
+body.print-baocao .baocao-filter-bar,
+body.print-baocao .card-header .btn,
+body.print-baocao #baocao-loading {
+  display: none !important;
+}
+
+body.print-baocao .chart-wrap {
+  height: 200px !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+body.print-baocao .chart-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}

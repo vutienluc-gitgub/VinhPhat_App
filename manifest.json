@@ -1,0 +1,19 @@
+{
+  "name": "Vĩnh Phát — Nhập liệu",
+  "short_name": "Vĩnh Phát",
+  "description": "Quản lý nhập liệu & xuất kho Dệt May Vĩnh Phát",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0f2744",
+  "background_color": "#0f2744",
+  "icons": [
+    {
+      "src": "assets/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

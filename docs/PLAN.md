@@ -4,15 +4,15 @@
 
 ## Trạng thái tổng quan
 
-| Phase | Tên                      | Ngày dự kiến | Trạng thái      |
-| ----- | ------------------------ | ------------ | --------------- |
-| 1     | Nền tảng & Ổn định       | Ngày 1-2     | ✅ Hoàn thành   |
-| 2     | Tìm kiếm & Lịch sử phiếu | Ngày 3-4     | ✅ Hoàn thành   |
-| 3     | Quản lý Tồn kho          | Ngày 5-6     | ✅ Hoàn thành   |
-| 4     | Báo cáo & Biểu đồ        | Ngày 7-9     | ✅ Hoàn thành   |
-| 5     | In phiếu & PDF           | Ngày 9-10    | 🔲 Chưa bắt đầu |
-| 6     | PWA & Offline            | Ngày 11-12   | 🔲 Chưa bắt đầu |
-| 7     | Phân quyền               | Ngày 13-14   | 🔲 Chưa bắt đầu |
+| Phase | Tên                      | Ngày dự kiến | Trạng thái    |
+| ----- | ------------------------ | ------------ | ------------- |
+| 1     | Nền tảng & Ổn định       | Ngày 1-2     | ✅ Hoàn thành |
+| 2     | Tìm kiếm & Lịch sử phiếu | Ngày 3-4     | ✅ Hoàn thành |
+| 3     | Quản lý Tồn kho          | Ngày 5-6     | ✅ Hoàn thành |
+| 4     | Báo cáo & Biểu đồ        | Ngày 7-9     | ✅ Hoàn thành |
+| 5     | In phiếu & PDF           | Ngày 9-10    | ✅ Hoàn thành |
+| 6     | PWA & Offline            | Ngày 11-12   | ✅ Hoàn thành |
+| 7     | Phân quyền               | Ngày 13-14   | ✅ Hoàn thành |
 
 ---
 
@@ -50,24 +50,24 @@
 
 ## Phase 5 — In phiếu & PDF _(Ngày 9-10)_
 
-- [ ] **T21** — Tạo `src/css/print.css` — print stylesheet chuyên biệt
-- [ ] **T22** — Nâng cấp layout phiếu giao hàng trong `src/js/phieu.js` (logo, border)
-- [ ] **T23** — Thêm nút "In phiếu" cho trang Thu tiền (TT)
+- [x] **T21** — Tạo `src/css/print.css` — print stylesheet chuyên biệt
+- [x] **T22** — Nâng cấp layout phiếu giao hàng trong `src/js/phieu.js` (logo, border)
+- [x] **T23** — Thêm nút “In phiếu” cho trang Thu tiền (TT)
 
-## Phase 6 — PWA & Offline _(Ngày 11-12)_
+## Phase 6 — PWA & Offline _(Ngày 11-12)_ ✅
 
-- [ ] **T24** — Tạo `public/manifest.json` (app icon, tên, theme color)
-- [ ] **T25** — Thêm PWA meta tags vào `index.html`
-- [ ] **T26** — Tạo `public/sw.js` — Service Worker (cache-first cho assets)
-- [ ] **T27** — Offline fallback page
-- [ ] **T28** — Lưu draft form vào IndexedDB khi mất mạng, tự sync khi có mạng lại
+- [x] **T24** — Tạo `manifest.json` (app icon, tên, theme color `#0f2744`)
+- [x] **T25** — Thêm PWA meta tags vào `index.html` (manifest, theme-color, apple-mobile)
+- [x] **T26** — Tạo `sw.js` — Service Worker (cache-first static, network-first GAS API)
+- [x] **T27** — Tạo `offline.html` — trang fallback khi mất mạng
+- [x] **T28** — Tạo `src/js/idb.js` — IndexedDB drafts + outbox; forms.js lưu outbox khi offline; app.js flush khi `online`
 
-## Phase 7 — Phân quyền _(Ngày 13-14)_
+## Phase 7 — Phân quyền _(Ngày 13-14)_ ✅
 
-- [ ] **T29** — Tạo `src/js/auth.js` — màn hình nhập PIN khi khởi động
-- [ ] **T30** — Phân 3 role: Xem-only / Nhập liệu / Admin (ẩn/hiện trang theo role)
-- [ ] **T31** — GAS: thêm sheet "Config" lưu danh sách role/PIN
-- [ ] **T32** — Cập nhật `src/js/app.js` — gọi auth trước khi init app
+- [x] **T29** — Tạo `src/js/auth.js` — màn hình nhập PIN khi khởi động; 3 role: xem/nhap/admin
+- [x] **T30** — Phân quyền nav: xem (3 trang), nhap (8 trang), admin (tất cả + cài đặt)
+- [x] **T31** — GAS: thêm `getConfig` action + `setupConfigSheet()` + sheet "Config" (role/PIN)
+- [x] **T32** — Cập nhật `src/js/app.js` + `init-events.js` — gọi auth trước init, nút Đăng xuất
 
 ---
 

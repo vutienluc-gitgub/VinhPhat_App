@@ -6,9 +6,10 @@ import { updateNvmId, updateVtpId, updateXkId, updateKhId } from './id-gen.js';
 import { syncFromSheets, loadKhDebt } from './sync.js';
 import { addRolls, removeRolls, resetRolls, updateVtpSummary, initRollDelegation } from './rolls.js';
 import { addXkItem, onItemHangChange, onItemGiaChange, initXkTabDelegation } from './xk-items.js';
-import { scheduleRenderPhieu, initPhieuDelegation } from './phieu.js';
+import { scheduleRenderPhieu, initPhieuDelegation, printThuTienPhieu } from './phieu.js';
 import { submitForm, resetForm, closeModal, updateTtRemaining } from './forms.js';
 import { saveConfig, clearConfig, testConnection, copyScript } from './settings.js';
+import { logout } from './auth.js';
 
 export function initEvents() {
   // ── Navigation: data-page delegation ──
@@ -52,6 +53,8 @@ export function initEvents() {
   bindClick('btn-sync-now', syncFromSheets);
   bindClick('btn-copy-script', copyScript);
   bindClick('btn-add-xk-item', addXkItem);
+  bindClick('btn-print-tt', printThuTienPhieu);
+  bindClick('btn-logout', logout);
 
   // ── Modal buttons ──
   bindClick('btn-modal-close', closeModal);

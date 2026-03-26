@@ -12,6 +12,7 @@ var SHEET_NAMES = {
   danhMucKH: 'Danh mục khách hàng',
   danhMucNCC: 'Danh mục nhà cung cấp',
   danhMucVai: 'Định mức',
+  config: 'Config',
 };
 
 // ── JSON response helper ──────────────────────────────────────
@@ -50,6 +51,8 @@ function doGet(e) {
         return json({ ok: true, rows: getHistory(ss, e ? e.parameter : {}) });
       case 'getReport':
         return json({ ok: true, data: getReport(ss, e ? e.parameter : {}) });
+      case 'getConfig':
+        return json({ ok: true, config: getAppConfig(ss) });
       case 'getAll':
         return json({
           ok: true,
@@ -588,4 +591,46 @@ function handleThemKH(ss, d) {
   var id = 'KH-' + pad(seq, 3);
   ws.appendRow([id, d.ngay || '', d.ten || '', d.phuTrach || 'Vu Tien Luc', '', '', '']);
   return { ok: true, id: id, ten: d.ten };
+}
+
+// ── Config (phân quyền PIN) ───────────────────────────────────
+
+/**
+ * Đọc cấu hình PIN từ sheet "Config".
+ * Cột A = role (xem/nhap/admin), Cột B = PIN, Cột C = nhãn hiển thị (tuỳ chọn)
+ */
+function getAppConfig(ss) {
+  var ws = ss.getSheetByName(SHEET_NAMES.config);
+  if (!ws || ws.getLastRow() < 2) return { pins: null };
+  var rows = ws.getRange(2, 1, ws.getLastRow() - 1, 2).getValues();
+  var pins = {};
+  rows.forEach(function (r) {
+    var role = String(r[0] || '')
+      .trim()
+      .toLowerCase();
+    var pin = String(r[1] || '').trim();
+    if (role && pin) pins[role] = pin;
+  });
+  return { pins: Object.keys(pins).length ? pins : null };
+}
+
+/**
+ * Tiện ích: chạy một lần từ Apps Script Editor để tạo sheet "Config"
+ * Menu: Chạy → setupConfigSheet
+ */
+function setupConfigSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ws = ss.getSheetByName(SHEET_NAMES.config);
+  if (!ws) {
+    ws = ss.insertSheet(SHEET_NAMES.config);
+  }
+  ws.clearContents();
+  ws.getRange(1, 1, 1, 3).setValues([['role', 'pin', 'nhan']]);
+  ws.getRange(2, 1, 3, 3).setValues([
+    ['xem', '1111', 'Xem báo cáo'],
+    ['nhap', '2222', 'Nhập liệu'],
+    ['admin', '0000', 'Quản trị'],
+  ]);
+  ws.getRange(1, 1, 1, 3).setFontWeight('bold');
+  SpreadsheetApp.getUi().alert('Đã tạo sheet Config với PIN mặc định.\nVui lòng đổi PIN ngay!');
 }

@@ -5,15 +5,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Vĩnh Phát — Nhập liệu</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f2744">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vĩnh Phát">
+  <link rel="apple-touch-icon" href="assets/images/icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="src/css/styles.css">
+  <link rel="stylesheet" href="src/css/print.css" media="print">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
+  <!-- ══ AUTH OVERLAY ══ -->
+  <div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#0b1c30;align-items:center;justify-content:center;font-family:'Be Vietnam Pro',sans-serif">
+    <div style="background:#132a45;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:36px 32px;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:#0f2744;border-radius:14px;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;letter-spacing:-1px">VP</div>
+      <div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px">Vĩnh Phát</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:28px">Quản lý sản xuất vải</div>
+
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:600">Chọn vai trò</div>
+      <div style="display:flex;gap:8px;margin-bottom:22px">
+        <button class="auth-role-btn" data-role="xem" style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;transition:all .15s;font-family:inherit">Xem</button>
+        <button class="auth-role-btn" data-role="nhap" style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;transition:all .15s;font-family:inherit">Nhập liệu</button>
+        <button class="auth-role-btn" data-role="admin" style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;transition:all .15s;font-family:inherit">Admin</button>
+      </div>
+
+      <input type="password" id="auth-pin" maxlength="8" inputmode="numeric" placeholder="Nhập PIN" autocomplete="off"
+        style="width:100%;padding:13px 14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:20px;text-align:center;letter-spacing:8px;margin-bottom:6px;outline:none;font-family:monospace">
+      <div id="auth-error" style="font-size:12px;color:#f87171;min-height:18px;margin-bottom:14px;"></div>
+      <button id="auth-login-btn"
+        style="width:100%;padding:13px;background:#2563eb;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s">
+        Đăng nhập
+      </button>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
   <div id="print-frame" style="display:none"></div>
 
@@ -109,6 +142,19 @@
             <polyline points="12 6 12 12 16 14" />
           </svg>
           <span id="gs-sync-ts">—</span>
+        </div>
+        <div id="outbox-badge" title="Có phiếu chờ gửi khi mất mạng"
+          style="display:none;margin-top:6px;background:#f59e0b;color:#1c1917;border-radius:10px;font-size:10px;font-weight:600;padding:2px 8px;align-items:center;gap:4px">
+          ⏳ <span></span> chờ gửi
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:6px">
+          <span id="auth-user-badge" style="display:none;font-size:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 8px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px"></span>
+          <button id="btn-logout" title="Đăng xuất"
+            style="display:none;background:none;border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.45);font-size:10px;padding:3px 8px;cursor:pointer;font-family:inherit;flex-shrink:0;transition:all .15s"
+            onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.color='rgba(255,255,255,.8)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.45)'">
+            Đăng xuất
+          </button>
         </div>
       </div>
     </nav>
@@ -666,6 +712,15 @@
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Lưu thanh toán
+                </button>
+                <button class="btn btn-outline" id="btn-print-tt"
+                  style="display:flex;align-items:center;gap:6px;padding:11px 16px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"/>
+                    <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                  In phiếu thu
                 </button>
                 <button class="btn btn-outline" data-reset="tt">Xóa trắng</button>
               </div>
@@ -1489,6 +1544,15 @@ function handleThemKH(ss, d) {
   </div>
 
   <script type="module" src="src/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function (err) {
+          console.warn('SW registration failed:', err);
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>

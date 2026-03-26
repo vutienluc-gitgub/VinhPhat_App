@@ -1130,56 +1130,7 @@ select.form-control {
 }
 
 /* ── PRINT STYLES ── */
-@media print {
-  /* === In phiếu giao hàng (mặc định) === */
-  body:not(.print-baocao) > *,
-  body:not(.print-baocao) .sidebar,
-  body:not(.print-baocao) .main,
-  body:not(.print-baocao) .topbar,
-  body:not(.print-baocao) .app {
-    display: none !important;
-  }
-
-  body:not(.print-baocao) #print-frame {
-    display: block !important;
-    position: fixed;
-    inset: 0;
-  }
-
-  /* === In báo cáo === */
-  body.print-baocao .sidebar,
-  body.print-baocao .topbar,
-  body.print-baocao #print-frame {
-    display: none !important;
-  }
-
-  body.print-baocao .main {
-    display: block !important;
-    padding: 0 !important;
-  }
-
-  body.print-baocao .page:not(#page-bao-cao) {
-    display: none !important;
-  }
-
-  body.print-baocao #page-bao-cao {
-    display: block !important;
-  }
-
-  body.print-baocao .baocao-filter-bar,
-  body.print-baocao .btn {
-    display: none !important;
-  }
-
-  body.print-baocao .chart-wrap {
-    height: 200px;
-  }
-
-  @page {
-    margin: 8mm 10mm;
-    size: A4 landscape;
-  }
-}
+/* Moved to src/css/print.css (linked with media="print" in index.html) */
 
 /* ── MODAL ── */
 .modal-overlay {

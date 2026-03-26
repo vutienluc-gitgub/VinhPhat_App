@@ -171,29 +171,26 @@ export function renderPhieu() {
   }
 
   el.innerHTML =
-    '<div style="font-family:Be Vietnam Pro,Arial,sans-serif;font-size:10px;background:#fff;padding:14px 16px;max-width:740px;margin:0 auto;color:#111">' +
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">' +
+    '<div style="font-family:Be Vietnam Pro,Arial,sans-serif;font-size:10px;background:#fff;max-width:740px;margin:0 auto;color:#111;border:2px solid #0f2744;border-radius:4px;overflow:hidden">' +
+    // ── Company branding header ──
+    '<div style="background:#0f2744;color:#fff;padding:7px 16px;display:flex;justify-content:space-between;align-items:center">' +
     '<div>' +
-    '<div style="font-size:20px;font-weight:900;letter-spacing:1px">PHIẾU GIAO HÀNG</div>' +
-    '<div style="font-size:9px;margin-top:4px">Khách hàng: <b style="font-size:12px">' +
-    (kh || 'VĨNH PHÁT') +
-    '</b></div>' +
-    '<div style="font-size:9px">Nơi Giao: ' +
-    (xe || '') +
+    '<div style="font-size:13px;font-weight:900;letter-spacing:1.5px">DỆT MAY VĨNH PHÁT</div>' +
+    '<div style="font-size:8px;opacity:.6;margin-top:1px;letter-spacing:.5px">QUẢN LÝ SẢN XUẤT VẢI</div>' +
     '</div>' +
+    '<div style="text-align:center">' +
+    '<div style="font-size:17px;font-weight:900;letter-spacing:2.5px">PHIẾU GIAO HÀNG</div>' +
+    '<div style="font-size:8.5px;opacity:.7;margin-top:2px">Khách hàng: <b>' + (kh || '—') + '</b>' + (xe ? '&nbsp;·&nbsp;' + escapeHtml(xe) : '') + '</div>' +
     '</div>' +
     '<div style="text-align:right;font-size:9px;line-height:1.8">' +
-    '<div style="font-size:14px;font-weight:800;letter-spacing:.5px">' +
-    phieuId +
-    '</div>' +
-    '<div>Người In: <b style="text-transform:uppercase">' +
+    '<div style="font-size:13px;font-weight:800;font-family:monospace;letter-spacing:.5px">' + phieuId + '</div>' +
+    '<div style="opacity:.75">Người in: <b style="text-transform:uppercase">' +
     escapeHtml(localStorage.getItem('vp_nguoi_in') || 'HUONG') +
-    '</b></div>' +
-    '<div>Ngày In: ' +
-    ngayIn +
+    '</b> · ' + ngayIn + '</div>' +
     '</div>' +
     '</div>' +
-    '</div>' +
+    // ── Content area ──
+    '<div style="padding:10px 16px">' +
     '<div style="display:flex;gap:30px;font-size:9px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #333">' +
     '<span>Hóa Đơn: _______________</span>' +
     '<span>Chứng Từ: <b>' +
@@ -238,7 +235,8 @@ export function renderPhieu() {
     '<div><div style="font-size:9.5px;font-weight:700">Người Giao</div><div style="font-size:8px;color:#888;font-style:italic">(Ký, ghi rõ họ tên)</div><div style="border-top:1px solid #999;margin:30px 10px 0"></div></div>' +
     '</div>' +
     '<div style="text-align:center;font-style:italic;font-size:9px;color:#aaa;margin-top:16px;padding-top:10px;border-top:1px dashed #ddd">We are here to serve you!</div>' +
-    '</div>' +
+    '</div>' + // close content area (padding:10px 16px)
+    '</div>' + // close outer border div
     '<div class="phieu-actions no-print">' +
     '<button class="btn btn-print" data-action="printPhieu">' +
     '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
@@ -342,4 +340,164 @@ export function initPhieuDelegation() {
     if (btn.dataset.action === 'printPhieu') printPhieu();
     else if (btn.dataset.action === 'exportPDF') exportPDF();
   });
+}
+
+/** Build a Phiếu Thu Tiền receipt HTML string */
+function buildThuTienHtml() {
+  const kh = escapeHtml(getVal('tt-kh'));
+  const ngay = getVal('tt-ngay');
+  const soTienRaw = parseFloat(document.getElementById('tt-so-tien')?.value || '0') || 0;
+  const hinhThuc = escapeHtml(getVal('tt-hinh-thuc') || 'Chuyển khoản');
+  const ghiChu = escapeHtml(getVal('tt-ghi-chu'));
+
+  // Read debt summary already displayed in the form
+  const tongMua = document.getElementById('tt-tong-mua')?.textContent?.trim() || '—';
+  const daTT = document.getElementById('tt-da-tt')?.textContent?.trim() || '—';
+  const conNo = document.getElementById('tt-con-no')?.textContent?.trim() || '—';
+
+  let ngayFmt = '___/___/______';
+  let ngayDai = '';
+  if (ngay) {
+    const p = ngay.split('-');
+    ngayFmt = p[2] + '/' + p[1] + '/' + p[0];
+    ngayDai = 'Ngày ' + parseInt(p[2]) + ' Tháng ' + parseInt(p[1]) + ' Năm ' + p[0];
+  }
+
+  const now = new Date();
+  const ngayIn =
+    (now.getDate() < 10 ? '0' : '') + now.getDate() + '/' +
+    (now.getMonth() < 9 ? '0' : '') + (now.getMonth() + 1) + '/' +
+    now.getFullYear();
+
+  // Generate a receipt ID from date + time
+  const dateStr = (ngay || now.toISOString().split('T')[0]).replace(/-/g, '').substring(2);
+  const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+  const ptId = 'PT-' + dateStr + '-' + timeStr;
+
+  const soTienFmt = fmtNum(Math.round(soTienRaw));
+
+  return (
+    '<div style="font-family:Be Vietnam Pro,Arial,sans-serif;font-size:10px;background:#fff;' +
+    'max-width:420px;margin:0 auto;color:#111;border:2px solid #0f2744;border-radius:4px;overflow:hidden">' +
+    // ── Company header ──
+    '<div style="background:#0f2744;color:#fff;padding:7px 16px;display:flex;justify-content:space-between;align-items:center">' +
+    '<div>' +
+    '<div style="font-size:13px;font-weight:900;letter-spacing:1.5px">DỆT MAY VĨNH PHÁT</div>' +
+    '<div style="font-size:8px;opacity:.6;margin-top:1px;letter-spacing:.5px">QUẢN LÝ SẢN XUẤT VẢI</div>' +
+    '</div>' +
+    '<div style="text-align:right;font-size:9px;line-height:1.8">' +
+    '<div style="font-size:13px;font-weight:800;font-family:monospace;letter-spacing:.5px">' + ptId + '</div>' +
+    '<div style="opacity:.75">Ngày in: ' + ngayIn + '</div>' +
+    '</div>' +
+    '</div>' +
+    // ── Title ──
+    '<div style="text-align:center;padding:10px 0 6px;border-bottom:1.5px solid #0f2744">' +
+    '<div style="font-size:16px;font-weight:900;letter-spacing:2px">PHIẾU THU TIỀN</div>' +
+    '<div style="font-size:9px;color:#555;margin-top:2px">' + (ngayDai || 'Ngày ___ Tháng ___ Năm ______') + '</div>' +
+    '</div>' +
+    // ── Body ──
+    '<div style="padding:12px 16px">' +
+    // Customer info
+    '<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:10px">' +
+    '<tr>' +
+    '<td style="color:#64748b;width:120px;padding:4px 0">Khách hàng:</td>' +
+    '<td style="font-weight:800;font-size:12px">' + (kh || '—') + '</td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td style="color:#64748b;padding:4px 0">Ngày thu:</td>' +
+    '<td style="font-weight:600">' + ngayFmt + '</td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td style="color:#64748b;padding:4px 0">Hình thức:</td>' +
+    '<td style="font-weight:600">' + hinhThuc + '</td>' +
+    '</tr>' +
+    (ghiChu
+      ? '<tr><td style="color:#64748b;padding:4px 0">Ghi chú:</td><td style="font-style:italic">' + ghiChu + '</td></tr>'
+      : '') +
+    '</table>' +
+    // Payment amount box
+    '<div style="background:#f0f9f5;border:1.5px solid #00886e;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">' +
+    '<span style="font-size:12px;font-weight:700">Số tiền thu</span>' +
+    '<span style="font-size:18px;font-weight:900;font-family:monospace;color:#00886e">' + soTienFmt + ' ₫</span>' +
+    '</div>' +
+    // Debt summary
+    '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;font-size:9.5px;margin-bottom:14px">' +
+    '<div style="font-weight:700;font-size:10px;margin-bottom:6px;color:#0f2744">Tình trạng công nợ</div>' +
+    '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e2e8f0">' +
+    '<span style="color:#64748b">Tổng tiền đã mua</span><span style="font-weight:600">' + tongMua + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e2e8f0">' +
+    '<span style="color:#64748b">Lần này thanh toán</span><span style="font-weight:700;color:#00886e">+ ' + soTienFmt + ' ₫</span></div>' +
+    '<div style="display:flex;justify-content:space-between;padding:4px 0">' +
+    '<span style="font-weight:700">Còn nợ sau thanh toán</span>' +
+    '<span style="font-weight:800;color:#e74c3c">' + conNo + '</span></div>' +
+    '</div>' +
+    // Signatures
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;margin-top:4px">' +
+    '<div><div style="font-size:9.5px;font-weight:700">Người Thu Tiền</div>' +
+    '<div style="font-size:8px;color:#888;font-style:italic">(Ký, ghi rõ họ tên)</div>' +
+    '<div style="border-top:1px solid #999;margin:28px 10px 0"></div></div>' +
+    '<div><div style="font-size:9.5px;font-weight:700">Người Nộp Tiền</div>' +
+    '<div style="font-size:8px;color:#888;font-style:italic">(Ký, ghi rõ họ tên)</div>' +
+    '<div style="border-top:1px solid #999;margin:28px 10px 0"></div></div>' +
+    '</div>' +
+    '<div style="text-align:center;font-style:italic;font-size:9px;color:#aaa;margin-top:14px;padding-top:8px;border-top:1px dashed #ddd">Xin chân thành cảm ơn quý khách!</div>' +
+    '</div>' + // close body padding
+    '</div>' // close outer border div
+  );
+}
+
+/** Open print dialog for a Thu Tiền receipt */
+export function printThuTienPhieu() {
+  const kh = getVal('tt-kh');
+  if (!kh) {
+    toast('Chọn khách hàng trước khi in phiếu thu!', 'error');
+    return;
+  }
+
+  const receiptHtml = buildThuTienHtml();
+  const fontUrl = 'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap';
+
+  const printHtml =
+    '<!DOCTYPE html><html lang="vi"><head>' +
+    '<meta charset="UTF-8">' +
+    '<title>Phiếu Thu Tiền</title>' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+    '<link href="' + fontUrl + '" rel="stylesheet">' +
+    '<style>' +
+    '* { margin:0; padding:0; box-sizing:border-box; }' +
+    'body { font-family:"Be Vietnam Pro",Arial,sans-serif; background:#fff; color:#111; padding:20px; }' +
+    'table { border-collapse:collapse; }' +
+    '@page { margin:10mm 15mm; size:A5 portrait; }' +
+    '@media print {' +
+    '  body { -webkit-print-color-adjust:exact; print-color-adjust:exact; padding:0; }' +
+    '}' +
+    '</style>' +
+    '</head><body>' +
+    receiptHtml +
+    '</body></html>';
+
+  const win = window.open('', '_blank', 'width=500,height=700,menubar=no,toolbar=no');
+  if (!win) {
+    toast('Trình duyệt chặn popup! Vào Settings → cho phép popup từ trang này.', 'error');
+    return;
+  }
+  win.document.open();
+  win.document.write(printHtml);
+  win.document.close();
+
+  const tryPrint = function () {
+    try {
+      win.focus();
+      win.print();
+    } catch (e) {
+      toast('Lỗi in: ' + e.message, 'error');
+    }
+  };
+  if (win.document.readyState === 'complete') {
+    setTimeout(tryPrint, 700);
+  } else {
+    win.onload = function () {
+      setTimeout(tryPrint, 500);
+    };
+  }
 }
