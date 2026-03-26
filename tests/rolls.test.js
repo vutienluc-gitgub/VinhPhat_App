@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { parseKg } from '../src/js/rolls.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+const scheduleRenderPhieu = vi.fn();
+
+vi.mock('../src/js/phieu.js', () => ({
+  scheduleRenderPhieu,
+}));
+
+const rollsModule = await import('../src/js/rolls.js');
+const { parseKg, removeRoll, removeRolls, resetRolls } = rollsModule;
+const { STATE } = await import('../src/js/state.js');
 
 describe('parseKg', () => {
   it('returns empty string for empty input', () => {
@@ -48,5 +57,39 @@ describe('parseKg', () => {
 
   it('trims whitespace', () => {
     expect(parseKg('  205  ')).toBe(20.5);
+  });
+});
+
+describe('xk preview rerender on roll removal', () => {
+  beforeEach(() => {
+    scheduleRenderPhieu.mockClear();
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    document.body.innerHTML = '<div id="xk-rolls"></div><span id="xk-roll-count"></span><span id="xk-total-cay"></span><span id="xk-total-kg"></span><span id="xk-tong-tien"></span>';
+    STATE.xk.items = [
+      {
+        hang: 'VAI A',
+        donGia: 10000,
+        rolls: [
+          { kg: '10', w: '' },
+          { kg: '20', w: '' },
+        ],
+      },
+    ];
+    STATE.xk.rolls = STATE.xk.items[0].rolls;
+  });
+
+  it('removeRoll schedules preview rerender for xk', () => {
+    removeRoll('xk', 0);
+    expect(scheduleRenderPhieu).toHaveBeenCalledTimes(1);
+  });
+
+  it('removeRolls schedules preview rerender for xk', () => {
+    removeRolls('xk', 1);
+    expect(scheduleRenderPhieu).toHaveBeenCalledTimes(1);
+  });
+
+  it('resetRolls schedules preview rerender for xk', () => {
+    resetRolls('xk');
+    expect(scheduleRenderPhieu).toHaveBeenCalledTimes(1);
   });
 });

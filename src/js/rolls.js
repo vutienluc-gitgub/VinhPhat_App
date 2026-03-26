@@ -34,6 +34,7 @@ export function removeRolls(type, n) {
   }
   if (rolls.length === 0) addRolls(type, 1);
   renderRolls(type);
+  if (type === 'xk') scheduleRenderPhieu();
 }
 
 /** Reset all rolls to default count (50) with confirmation */
@@ -43,12 +44,14 @@ export function resetRolls(type) {
   }
   STATE[type].rolls = Array.from({ length: DEFAULT_ROLLS }, () => ({ kg: '', w: '' }));
   renderRolls(type);
+  if (type === 'xk') scheduleRenderPhieu();
 }
 
 export function removeRoll(type, idx) {
   STATE[type].rolls.splice(idx, 1);
   if (STATE[type].rolls.length === 0) STATE[type].rolls.push({ kg: '', w: '' });
   renderRolls(type);
+  if (type === 'xk') scheduleRenderPhieu();
 }
 
 /** Parse a raw kg input with smart decimal handling (e.g. "205" → 20.5) */
