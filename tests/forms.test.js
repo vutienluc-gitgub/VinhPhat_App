@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { buildSummaryHtml, buildPayload } from '../src/js/forms.js';
-import { STATE } from '../src/js/state.js';
+import { buildSummaryHtml, buildPayload, resetForm } from '../src/js/forms.js';
+import { STATE, setXkActive } from '../src/js/state.js';
 
 // ── Helpers ──────────────────────────────────────────────
 function setInput(id, value) {
@@ -183,5 +183,54 @@ describe('buildPayload — kh', () => {
     expect(p.ten).toBe('Công ty ABC');
     expect(p.phuTrach).toBe('NV01');
     expect(p.sdt).toBe('0901234567');
+  });
+});
+
+describe('resetForm — xk', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <input id="xk-kh" value="Khách A">
+      <input id="xk-xe" value="51A-12345">
+      <input id="xk-ghi-chu" value="Ghi chú cũ">
+      <input id="xk-ngay" value="2026-03-25">
+      <select id="xk-tt"><option value="Chưa thanh toán">Chưa thanh toán</option><option value="Đã thanh toán" selected>Đã thanh toán</option></select>
+      <select id="xk-item-hang"><option value="">— Chọn tên hàng —</option><option value="CHÂN CUA PE XÁM">CHÂN CUA PE XÁM</option></select>
+      <input id="xk-item-gia" value="72000">
+      <div id="xk-item-info" style="display:grid"></div>
+      <div id="xk-item-tabs"></div>
+      <div id="xk-rolls"></div>
+      <span id="xk-roll-count"></span>
+      <span id="xk-total-cay"></span>
+      <span id="xk-total-kg"></span>
+      <span id="xk-tong-tien"></span>
+      <div id="phieu-preview"></div>
+      <span id="xk-id-preview">PXK-VTP-001</span>
+    `;
+
+    STATE.xk.items = [
+      {
+        hang: 'CHÂN CUA PE XÁM',
+        donGia: 72000,
+        rolls: [{ kg: '20', w: '' }],
+      },
+    ];
+    STATE.xk.rolls = STATE.xk.items[0].rolls;
+    setXkActive(0);
+    document.getElementById('xk-item-hang').value = 'CHÂN CUA PE XÁM';
+  });
+
+  it('resets xk UI from state and clears stale donGia fields', () => {
+    resetForm('xk');
+
+    expect(document.getElementById('xk-kh').value).toBe('');
+    expect(document.getElementById('xk-xe').value).toBe('');
+    expect(document.getElementById('xk-ghi-chu').value).toBe('');
+    expect(document.getElementById('xk-item-hang').value).toBe('');
+    expect(document.getElementById('xk-item-gia').value).toBe('');
+    expect(document.getElementById('xk-item-info').style.display).toBe('none');
+    expect(STATE.xk.items).toHaveLength(1);
+    expect(STATE.xk.items[0].donGia).toBe(0);
+    expect(STATE.xk.items[0].hang).toBe('');
+    expect(STATE.xk.items[0].rolls).toHaveLength(50);
   });
 });

@@ -7,7 +7,7 @@ import { showPage } from './navigation.js';
 import { updateNvmId, updateXkId, updateKhId, confirmAndLockXkId } from './id-gen.js';
 import { syncFromSheets } from './sync.js';
 import { renderRolls } from './rolls.js';
-import { saveActiveItemFromForm, renderXkTabs } from './xk-items.js';
+import { saveActiveItemFromForm, renderXkTabs, syncItemFormToActive } from './xk-items.js';
 import { renderPhieu } from './phieu.js';
 import { saveDraft, clearDraft, addToOutbox } from './idb.js';
 
@@ -414,12 +414,10 @@ export function resetForm(type) {
     renderRolls('vtp');
   }
   if (type === 'xk') {
-    ['xk-kh', 'xk-xe', 'xk-item-hang'].forEach(function (id) {
+    ['xk-kh', 'xk-xe', 'xk-ghi-chu'].forEach(function (id) {
       const e = document.getElementById(id);
       if (e) e.value = '';
     });
-    const dge = document.getElementById('xk-don-gia');
-    if (dge) dge.value = '';
     const dte = document.getElementById('xk-ngay');
     if (dte) dte.value = today;
     const tte = document.getElementById('xk-tt');
@@ -436,7 +434,9 @@ export function resetForm(type) {
     setXkActive(0);
     STATE.xk.rolls = STATE.xk.items[0].rolls;
     renderXkTabs();
+    syncItemFormToActive();
     renderRolls('xk');
+    renderPhieu();
   }
   if (type === 'tt') {
     document.getElementById('tt-kh').value = '';
