@@ -3,7 +3,7 @@
 import { STATE, SYNC } from './state.js';
 import { escapeHtml, safeText, fmtNum } from './utils.js';
 import { updateKhId } from './id-gen.js';
-import { updateHistoryKhFilter } from './history.js';
+import { updateHistoryKhFilter, updateFilterDropdown } from './history.js';
 import { renderTonKho } from './tonkho.js';
 
 const MAX_RETRIES = 3;
@@ -56,6 +56,7 @@ export async function syncFromSheets() {
     if (data.ncc && data.ncc.length) {
       SYNC.ncc = data.ncc;
       updateNccDropdowns(data.ncc);
+      updateFilterDropdown();
     }
     if (data.noKhach) {
       SYNC.noKhach = data.noKhach;

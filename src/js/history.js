@@ -240,7 +240,7 @@ function updateHistoryCount(shown, total) {
 }
 
 /** Cập nhật dropdown đối tác dựa theo loại phiếu đang chọn */
-function updateFilterDropdown() {
+export function updateFilterDropdown() {
   const type = document.getElementById('history-type')?.value || 'all';
   const config = TYPE_FILTER_CONFIG[type] || TYPE_FILTER_CONFIG['all'];
   const label = document.getElementById('history-kh-label');
