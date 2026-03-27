@@ -48,11 +48,13 @@ export async function syncFromSheets() {
     if (!data.ok) throw new Error(data.msg || 'Sync failed');
 
     if (data.khachHang && data.khachHang.length) {
+      SYNC.khachHang = data.khachHang;
       updateKhDropdowns(data.khachHang);
       updateKhTable(data.khachHang);
       updateHistoryKhFilter(data.khachHang);
     }
     if (data.ncc && data.ncc.length) {
+      SYNC.ncc = data.ncc;
       updateNccDropdowns(data.ncc);
     }
     if (data.noKhach) {

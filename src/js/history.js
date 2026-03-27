@@ -1,6 +1,7 @@
 // ══ HISTORY — Lịch sử phiếu ══
 
 import { escapeHtml, fmtNum, toast } from './utils.js';
+import { SYNC } from './state.js';
 
 const TYPE_LABEL = {
   nvm: 'Nhập vải mộc',
@@ -258,9 +259,34 @@ function updateFilterDropdown() {
 
   sel.disabled = false;
 
-  // Trích giá trị duy nhất từ cache theo field tương ứng
+  // Trích giá trị duy nhất: ưu tiên master data từ sync, fallback cache
   const values = [];
   const seen = {};
+
+  if (config.field === 'nhaDet') {
+    SYNC.ncc.forEach(function (n) {
+      var loai = (n.loai || '').toUpperCase();
+      if (loai.indexOf('DỆT') !== -1 || loai.indexOf('DET') !== -1) {
+        var val = (n.ten || '').trim();
+        if (val && !seen[val]) { seen[val] = true; values.push(val); }
+      }
+    });
+  } else if (config.field === 'nhaNhuom') {
+    SYNC.ncc.forEach(function (n) {
+      var loai = (n.loai || '').toUpperCase();
+      if (loai.indexOf('NHUỘM') !== -1 || loai.indexOf('NHUOM') !== -1) {
+        var val = (n.ten || '').trim();
+        if (val && !seen[val]) { seen[val] = true; values.push(val); }
+      }
+    });
+  } else if (config.field === 'khachHang') {
+    SYNC.khachHang.forEach(function (kh) {
+      var val = (kh.ten || '').trim();
+      if (val && !seen[val]) { seen[val] = true; values.push(val); }
+    });
+  }
+
+  // Bổ sung thêm từ cache (phòng trường hợp có giá trị cũ không nằm trong master data)
   _cache.forEach(function (r) {
     var val = (r[config.field] || '').trim();
     if (val && !seen[val]) { seen[val] = true; values.push(val); }

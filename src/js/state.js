@@ -23,6 +23,8 @@ export const SYNC = {
   isLoading: false,
   connected: false,
   tonKho: null,
+  ncc: [],
+  khachHang: [],
 };
 
 // XK_ACTIVE cần mutable export — dùng getter/setter
