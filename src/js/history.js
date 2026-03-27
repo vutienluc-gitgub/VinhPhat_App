@@ -53,6 +53,9 @@ export function initHistory() {
       renderFilteredHistory();
     });
   });
+
+  // Thiết lập trạng thái dropdown ban đầu
+  updateFilterDropdown();
 }
 
 /** Fetch dữ liệu lịch sử từ GAS, áp dụng filter ngày & loại */
