@@ -1,7 +1,7 @@
 // ══ SERVICE WORKER — VinhPhat_App PWA ══
 // Chiến lược: Cache-first cho static assets, Network-first cho API GAS
 
-const CACHE_NAME = 'vp-app-v2';
+const CACHE_NAME = 'vp-app-v3';
 
 // Assets cần cache ngay khi SW cài đặt
 const PRECACHE_ASSETS = [
@@ -100,17 +100,8 @@ self.addEventListener('fetch', function (event) {
 
   // App assets (local) → Cache-first
   if (event.request.mode === 'navigate') {
-    // Navigation requests → trả về app shell (index.html), fallback offline
-    event.respondWith(
-      caches.match('./index.html').then(function (cached) {
-        return (
-          cached ||
-          fetch(event.request).catch(function () {
-            return caches.match('./offline.html');
-          })
-        );
-      }),
-    );
+    // Navigation requests → ưu tiên network để tránh giữ app shell cũ sau deploy
+    event.respondWith(networkFirstPage(event.request));
     return;
   }
 
@@ -152,5 +143,23 @@ function networkFirstWithCache(request) {
     })
     .catch(function () {
       return caches.match(request);
+    });
+}
+
+function networkFirstPage(request) {
+  return fetch(request)
+    .then(function (response) {
+      if (response && response.status === 200 && response.type === 'basic') {
+        const cloned = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put('./index.html', cloned);
+        });
+      }
+      return response;
+    })
+    .catch(function () {
+      return caches.match('./index.html').then(function (cached) {
+        return cached || caches.match('./offline.html');
+      });
     });
 }

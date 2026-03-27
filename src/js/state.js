@@ -22,6 +22,7 @@ export const SYNC = {
   lastTs: 0,
   isLoading: false,
   connected: false,
+  tonKho: null,
 };
 
 // XK_ACTIVE cần mutable export — dùng getter/setter

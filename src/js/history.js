@@ -14,6 +14,14 @@ const TYPE_BADGE_CLASS = {
   xk: 'badge-orange',
 };
 
+/** Cấu hình dropdown đối tác theo loại phiếu */
+const TYPE_FILTER_CONFIG = {
+  all:  { label: 'Đối tác',     placeholder: '— Tất cả —',             field: null },
+  nvm:  { label: 'Nhà dệt',     placeholder: '— Tất cả nhà dệt —',     field: 'nhaDet' },
+  vtp:  { label: 'Nhà nhuộm',   placeholder: '— Tất cả nhà nhuộm —',   field: 'nhaNhuom' },
+  xk:   { label: 'Khách hàng',  placeholder: '— Tất cả khách hàng —',  field: 'khachHang' },
+};
+
 /** Raw data cache từ lần fetch gần nhất */
 let _cache = [];
 
@@ -30,8 +38,16 @@ export function initHistory() {
     });
   }
 
+  // Khi đổi loại phiếu → cập nhật dropdown đối tác & lọc lại
+  if (selType) {
+    selType.addEventListener('input', function () {
+      updateFilterDropdown();
+      renderFilteredHistory();
+    });
+  }
+
   // Client-side filter chạy ngay khi gõ / đổi dropdown
-  [inputSearch, selType, selKH].forEach(function (el) {
+  [inputSearch, selKH].forEach(function (el) {
     if (!el) return;
     el.addEventListener('input', function () {
       renderFilteredHistory();
@@ -77,6 +93,7 @@ export async function loadHistory() {
     if (!data.ok) throw new Error(data.msg || 'Fetch failed');
 
     _cache = data.rows || [];
+    updateFilterDropdown();
     renderFilteredHistory();
     updateHistoryCount(_cache.length);
   } catch (err) {
@@ -100,10 +117,11 @@ function renderFilteredHistory() {
     });
   }
 
-  // Lọc khách hàng
-  if (filterKH) {
+  // Lọc đối tác (nhà dệt / nhà nhuộm / khách hàng tuỳ loại phiếu)
+  const filterConfig = TYPE_FILTER_CONFIG[filterType] || TYPE_FILTER_CONFIG['all'];
+  if (filterKH && filterConfig.field) {
     rows = rows.filter(function (r) {
-      return (r.khachHang || '').toLowerCase() === filterKH;
+      return (r[filterConfig.field] || '').toLowerCase() === filterKH;
     });
   }
 
@@ -217,10 +235,50 @@ function updateHistoryCount(shown, total) {
   }
 }
 
-/** Cập nhật dropdown khách hàng cho filter */
+/** Cập nhật dropdown đối tác dựa theo loại phiếu đang chọn */
+function updateFilterDropdown() {
+  const type = document.getElementById('history-type')?.value || 'all';
+  const config = TYPE_FILTER_CONFIG[type] || TYPE_FILTER_CONFIG['all'];
+  const label = document.getElementById('history-kh-label');
+  const sel = document.getElementById('history-kh');
+
+  if (label) label.textContent = config.label;
+  if (!sel) return;
+
+  sel.value = '';
+
+  if (!config.field) {
+    sel.innerHTML = '<option value="">' + escapeHtml(config.placeholder) + '</option>';
+    sel.disabled = true;
+    return;
+  }
+
+  sel.disabled = false;
+
+  // Trích giá trị duy nhất từ cache theo field tương ứng
+  const values = [];
+  const seen = {};
+  _cache.forEach(function (r) {
+    var val = (r[config.field] || '').trim();
+    if (val && !seen[val]) { seen[val] = true; values.push(val); }
+  });
+  values.sort();
+
+  let opts = '<option value="">' + escapeHtml(config.placeholder) + '</option>';
+  values.forEach(function (v) {
+    opts += '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>';
+  });
+  sel.innerHTML = opts;
+}
+
+/** Cập nhật dropdown khách hàng cho filter (gọi từ sync) */
 export function updateHistoryKhFilter(khList) {
   const sel = document.getElementById('history-kh');
   if (!sel) return;
+  const type = document.getElementById('history-type')?.value || 'all';
+  // Chỉ cập nhật nếu đang ở chế độ xk hoặc all và chưa có cache
+  if (type !== 'xk' && type !== 'all') return;
+  if (_cache.length) return;
   const cur = sel.value;
   let opts = '<option value="">— Tất cả khách hàng —</option>';
   khList.forEach(function (kh) {

@@ -59,6 +59,7 @@ export async function syncFromSheets() {
       SYNC.noKhach = data.noKhach;
     }
     if (data.tonKho) {
+      SYNC.tonKho = data.tonKho;
       renderTonKho(data.tonKho);
     }
     if (data.seq) {

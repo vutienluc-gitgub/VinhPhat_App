@@ -6,6 +6,19 @@ VinhPhat_App là một ứng dụng web nội bộ (Internal Web App) được t
 
 Đặc biệt, ứng dụng được phát triển thành một Progressive Web App (PWA), cho phép cài đặt lên máy tính hoặc điện thoại và có khả năng hoạt động offline, tự động đồng bộ dữ liệu khi có mạng trở lại, đảm bảo công việc không bị gián đoạn.
 
+# Tài liệu QA mobile
+
+Để phục vụ kiểm tra giao diện và trải nghiệm trên điện thoại, bộ tài liệu QA mobile được tổ chức riêng trong thư mục `docs`.
+
+- Checklist test mobile: xem file [mobile-qa-checklist.md](mobile-qa-checklist.md)
+- Mẫu ghi nhận bug mobile: xem file [mobile-bug-log.md](mobile-bug-log.md)
+
+Thứ tự làm việc khuyến nghị:
+
+1. Mở checklist mobile và test theo từng viewport, từng page.
+2. Khi phát hiện lỗi, ghi ngay vào bug log theo mẫu có sẵn.
+3. Sau khi sửa lỗi, quay lại retest đúng viewport và thao tác đã lỗi trước đó.
+
 # Các tính năng chính
 
 Ứng dụng được chia thành các module chức năng tương ứng với các trang.

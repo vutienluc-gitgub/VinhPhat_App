@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Vĩnh Phát — Nhập liệu</title>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -177,7 +177,7 @@
      PAGE 1 · NHẬP VẢI MỘC
 ════════════════════════════════════════════ -->
       <div class="page active content" id="page-nhap-moc">
-        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+        <div class="page-shell page-shell-form-aside" style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
           <!-- Form bên trái -->
           <div>
             <div class="card" style="margin-bottom:16px">
@@ -285,14 +285,14 @@
           </div>
 
           <!-- Tóm tắt bên phải -->
-          <div style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
+          <div class="page-aside-sticky" style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
             <div class="card">
               <div class="card-header">
                 <div class="card-title">📊 Tóm tắt lô</div>
               </div>
               <div class="card-body">
                 <div class="roll-summary" style="flex-direction:column;gap:14px">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                  <div class="stats-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                     <div class="roll-stat">
                       <div class="roll-stat-val" id="nvm-total-cay">0</div>
                       <div class="roll-stat-lbl">Tổng cây</div>
@@ -347,7 +347,7 @@
      PAGE 2 · VẢI THÀNH PHẨM
 ════════════════════════════════════════════ -->
       <div class="page content" id="page-vai-tp">
-        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+        <div class="page-shell page-shell-form-aside" style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
           <div>
             <div class="card" style="margin-bottom:16px">
               <div class="card-header">
@@ -447,14 +447,14 @@
             </div>
           </div>
 
-          <div style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
+          <div class="page-aside-sticky" style="position:sticky;top:78px;display:flex;flex-direction:column;gap:16px">
             <div class="card">
               <div class="card-header">
                 <div class="card-title">📊 Tóm tắt</div>
               </div>
               <div class="card-body">
                 <div class="roll-summary" style="flex-direction:column;gap:14px">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                  <div class="stats-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                     <div class="roll-stat">
                       <div class="roll-stat-val" id="vtp-total-cay">0</div>
                       <div class="roll-stat-lbl">Tổng cây</div>
@@ -488,7 +488,7 @@
      PAGE 3 · XUẤT KHO
 ════════════════════════════════════════════ -->
       <div class="page content" id="page-xuat-kho">
-        <div style="display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start">
+        <div class="page-shell page-shell-xk" style="display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start">
 
           <!-- ── CỘT TRÁI ── -->
           <div style="display:flex;flex-direction:column;gap:14px">
@@ -579,7 +579,7 @@
                   </div>
                   <!-- Hiển thị thông tin hàng hóa từ HANG_DATA -->
                   <div class="form-group" style="grid-column:1/-1">
-                    <div id="xk-item-info"
+                    <div id="xk-item-info" class="item-info-grid"
                       style="display:none;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
                     </div>
                   </div>
@@ -893,7 +893,7 @@
                 <input type="date" class="form-control" id="history-to">
               </div>
               <div class="form-group">
-                <label class="form-label">Khách hàng</label>
+                <label class="form-label" id="history-kh-label">Khách hàng</label>
                 <select class="form-control" id="history-kh" style="min-width:160px">
                   <option value="">— Tất cả khách hàng —</option>
                 </select>
@@ -1106,7 +1106,7 @@
             <!-- Content -->
             <div id="baocao-content" style="display:none">
               <!-- Biểu đồ 2 cột -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+              <div class="chart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
                 <div class="chart-card">
                   <div class="chart-card-title">💰 Doanh thu xuất kho (VND)</div>
                   <div class="chart-wrap">
@@ -1197,7 +1197,7 @@
               <div id="sync-status-panel"
                 style="display:none;margin-top:10px;background:var(--bg);border-radius:8px;padding:12px 14px">
                 <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px">📡 Realtime Sync</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+                <div class="config-stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
                   <div style="background:var(--card);border-radius:6px;padding:8px 10px;border:1px solid var(--border)">
                     <div style="color:var(--muted);margin-bottom:3px">Trạng thái</div>
                     <div id="sync-state-badge" style="font-weight:600;color:var(--green)">—</div>

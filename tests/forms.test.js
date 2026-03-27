@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { buildSummaryHtml, buildPayload, resetForm } from '../src/js/forms.js';
-import { STATE, setXkActive } from '../src/js/state.js';
+import { STATE, SYNC, setXkActive } from '../src/js/state.js';
 
 // ── Helpers ──────────────────────────────────────────────
 function setInput(id, value) {
@@ -129,6 +129,77 @@ describe('buildPayload — nvm', () => {
     expect(p.tongCay).toBe(2);
     expect(p.tongCan).toBeCloseTo(39.8, 1);
     expect(p.kgs).toEqual([20.5, 19.3]);
+  });
+});
+
+describe('buildPayload — xk', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="toast-container"></div>';
+    setInput('xk-ngay', '2026-03-25');
+    setSelect('xk-kh', 'Khách A');
+    setInput('xk-xe', '51A-12345');
+    setSelect('xk-tt', 'Chưa thanh toán');
+    setInput('xk-ghi-chu', '');
+    setSelect('xk-item-hang', 'CHÂN CUA PE XÁM');
+    setInput('xk-item-gia', '72000');
+    STATE.xk.items = [
+      {
+        hang: 'CHÂN CUA PE XÁM',
+        donGia: 72000,
+        rolls: [{ kg: '10' }, { kg: '12.5' }, { kg: '' }],
+      },
+    ];
+    STATE.xk.rolls = STATE.xk.items[0].rolls;
+    setXkActive(0);
+    SYNC.tonKho = {
+      vtp: [
+        {
+          tenHang: 'CHÂN CUA PE XÁM',
+          tonCay: 10,
+          tonCan: 100,
+        },
+      ],
+    };
+  });
+
+  it('returns null when an exported item has non-positive donGia', () => {
+    STATE.xk.items[0].donGia = 0;
+    document.getElementById('xk-item-gia').value = '0';
+
+    expect(buildPayload('xk')).toBeNull();
+  });
+
+  it('builds correct payload when xk data is valid', () => {
+    const p = buildPayload('xk');
+
+    expect(p).not.toBeNull();
+    expect(p.action).toBe('xuatKho');
+    expect(p.khachHang).toBe('Khách A');
+    expect(p.tongCay).toBe(2);
+    expect(p.tongCan).toBeCloseTo(22.5, 1);
+    expect(p.items).toEqual([
+      {
+        tenHang: 'CHÂN CUA PE XÁM',
+        donGia: 72000,
+        tongCan: 22.5,
+        tongCay: 2,
+        kgs: [10, 12.5],
+      },
+    ]);
+  });
+
+  it('returns null when requested quantity exceeds synced stock', () => {
+    SYNC.tonKho = {
+      vtp: [
+        {
+          tenHang: 'CHÂN CUA PE XÁM',
+          tonCay: 1,
+          tonCan: 20,
+        },
+      ],
+    };
+
+    expect(buildPayload('xk')).toBeNull();
   });
 });
 

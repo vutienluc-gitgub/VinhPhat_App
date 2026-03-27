@@ -258,6 +258,66 @@ function getTonKho(ss) {
   return { nvm: nvmList, vtp: vtpList };
 }
 
+function validateXuatKhoTonKho(ss, items) {
+  var tonKho = getTonKho(ss);
+  var tonMap = {};
+  (tonKho.vtp || []).forEach(function (row) {
+    var tenHang = String((row && row.tenHang) || '').trim();
+    if (!tenHang) return;
+    tonMap[tenHang] = {
+      tonCay: parseInt(row.tonCay, 10) || 0,
+      tonCan: parseFloat(row.tonCan) || 0,
+    };
+  });
+
+  var requestedMap = {};
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i] || {};
+    var tenHang = String(item.tenHang || '').trim();
+    var kgs = item.kgs || [];
+    if (!kgs.length && !tenHang) continue;
+    if (!tenHang) {
+      return { ok: false, msg: 'Mỗi mặt hàng có cây xuất phải chọn tên hàng.' };
+    }
+    if (!requestedMap[tenHang]) {
+      requestedMap[tenHang] = { tongCay: 0, tongCan: 0 };
+    }
+    requestedMap[tenHang].tongCay += kgs.length;
+    for (var j = 0; j < kgs.length; j++) {
+      requestedMap[tenHang].tongCan += parseFloat(kgs[j]) || 0;
+    }
+    requestedMap[tenHang].tongCan = Math.round(requestedMap[tenHang].tongCan * 100) / 100;
+  }
+
+  var tenHangs = Object.keys(requestedMap);
+  for (var k = 0; k < tenHangs.length; k++) {
+    var tenHangKey = tenHangs[k];
+    var requested = requestedMap[tenHangKey];
+    var available = tonMap[tenHangKey] || { tonCay: 0, tonCan: 0 };
+    var vuotCay = requested.tongCay > available.tonCay;
+    var vuotCan = requested.tongCan > available.tonCan + 0.001;
+    if (vuotCay || vuotCan) {
+      return {
+        ok: false,
+        msg:
+          'Xuất vượt tồn kho cho ' +
+          tenHangKey +
+          ': tồn ' +
+          available.tonCay +
+          ' cây / ' +
+          available.tonCan.toFixed(1) +
+          ' kg, đang xuất ' +
+          requested.tongCay +
+          ' cây / ' +
+          requested.tongCan.toFixed(1) +
+          ' kg.',
+      };
+    }
+  }
+
+  return { ok: true };
+}
+
 function getHistory(ss, params) {
   var type = (params && params.type) || 'all';
   var from = (params && params.from) || '';
@@ -266,7 +326,7 @@ function getHistory(ss, params) {
 
   function inRange(ngay) {
     if (!from && !to) return true;
-    var s = String(ngay).substring(0, 10);
+    var s = fmtNgay(ngay);
     if (from && s < from) return false;
     if (to && s > to) return false;
     return true;
@@ -478,8 +538,6 @@ function handleVaiTP(ss, d) {
 
 function handleXuatKho(ss, d) {
   var ws = ss.getSheetByName(SHEET_NAMES.phieuXuatKho);
-  var seq = nextSeq(ws);
-  var id = 'PXK-VTP-' + pad(seq, 3);
   var items = d.items || [];
   // Tương thích ngược: nếu không có items[], dùng d.kgs trực tiếp
   if (!items.length && d.kgs) {
@@ -491,6 +549,11 @@ function handleXuatKho(ss, d) {
       },
     ];
   }
+  var validation = validateXuatKhoTonKho(ss, items);
+  if (!validation.ok) return validation;
+
+  var seq = nextSeq(ws);
+  var id = 'PXK-VTP-' + pad(seq, 3);
   var tongTien = 0,
     tongCanAll = 0,
     tongCayAll = 0;

@@ -1,7 +1,7 @@
 // ══ FORMS — Submit, confirm, reset logic ══
 
 import { DEFAULT_ROLLS } from './config.js';
-import { STATE, setXkActive } from './state.js';
+import { STATE, SYNC, setXkActive } from './state.js';
 import { escapeHtml, getVal, safeText, safeHtml, fmtNum, toast } from './utils.js';
 import { showPage } from './navigation.js';
 import { updateNvmId, updateXkId, updateKhId, confirmAndLockXkId } from './id-gen.js';
@@ -10,6 +10,61 @@ import { renderRolls } from './rolls.js';
 import { saveActiveItemFromForm, renderXkTabs, syncItemFormToActive } from './xk-items.js';
 import { renderPhieu } from './phieu.js';
 import { saveDraft, clearDraft, addToOutbox } from './idb.js';
+
+function getXkStockIssue(items) {
+  const tonKhoVtp = (SYNC.tonKho && SYNC.tonKho.vtp) || [];
+  if (!tonKhoVtp.length) return null;
+
+  const tonMap = tonKhoVtp.reduce(function (acc, row) {
+    const tenHang = String((row && row.tenHang) || '').trim();
+    if (!tenHang) return acc;
+    acc[tenHang] = {
+      tonCay: parseInt(row.tonCay, 10) || 0,
+      tonCan: parseFloat(row.tonCan) || 0,
+    };
+    return acc;
+  }, {});
+
+  const requestedMap = {};
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i] || {};
+    const tenHang = String(item.tenHang || '').trim();
+    if (!tenHang) {
+      return 'Mỗi mặt hàng có cây xuất phải chọn tên hàng!';
+    }
+    if (!requestedMap[tenHang]) {
+      requestedMap[tenHang] = { tongCay: 0, tongCan: 0 };
+    }
+    requestedMap[tenHang].tongCay += parseInt(item.tongCay, 10) || 0;
+    requestedMap[tenHang].tongCan += parseFloat(item.tongCan) || 0;
+  }
+
+  const tenHangs = Object.keys(requestedMap);
+  for (let i = 0; i < tenHangs.length; i++) {
+    const tenHang = tenHangs[i];
+    const requested = requestedMap[tenHang];
+    const available = tonMap[tenHang] || { tonCay: 0, tonCan: 0 };
+    const vuotCay = requested.tongCay > available.tonCay;
+    const vuotCan = requested.tongCan > available.tonCan + 0.001;
+    if (vuotCay || vuotCan) {
+      return (
+        'Xuất vượt tồn kho cho ' +
+        tenHang +
+        ': tồn ' +
+        available.tonCay +
+        ' cây / ' +
+        available.tonCan.toFixed(1) +
+        ' kg, đang xuất ' +
+        requested.tongCay +
+        ' cây / ' +
+        requested.tongCan.toFixed(1) +
+        ' kg.'
+      );
+    }
+  }
+
+  return null;
+}
 
 export function updateTtRemaining() {
   const el = document.getElementById('tt-remaining');
@@ -145,7 +200,9 @@ export function buildPayload(type) {
     const items = [];
     let tongCanAll = 0,
       tongCayAll = 0;
+    let hasInvalidDonGia = false;
     STATE.xk.items.forEach(function (item) {
+      if (hasInvalidDonGia) return;
       const kgsI = item.rolls
         .map(function (r) {
           return parseFloat(r.kg) || 0;
@@ -154,6 +211,16 @@ export function buildPayload(type) {
           return k > 0;
         });
       if (!kgsI.length && !item.hang) return;
+        if (kgsI.length && !item.hang) {
+          hasInvalidDonGia = true;
+          toast('Mỗi mặt hàng có cây xuất phải chọn tên hàng!', 'error');
+          return;
+        }
+      if (kgsI.length && (!item.donGia || item.donGia <= 0)) {
+          hasInvalidDonGia = true;
+        toast('Mỗi mặt hàng có cây xuất phải có đơn giá lớn hơn 0!', 'error');
+        return;
+      }
       const tc = kgsI.reduce(function (a, b) {
         return a + b;
       }, 0);
@@ -167,8 +234,16 @@ export function buildPayload(type) {
         kgs: kgsI,
       });
     });
+    if (hasInvalidDonGia) {
+      return null;
+    }
     if (!items.length) {
       toast('Chưa có mặt hàng nào có dữ liệu!', 'error');
+      return null;
+    }
+    const stockIssue = getXkStockIssue(items);
+    if (stockIssue) {
+      toast(stockIssue, 'error');
       return null;
     }
     return {
