@@ -264,6 +264,7 @@ export function updateFilterDropdown() {
   const seen = {};
 
   if (config.field === 'nhaDet') {
+    // Ưu tiên SYNC.ncc
     SYNC.ncc.forEach(function (n) {
       var loai = (n.loai || '').toUpperCase();
       if (loai.indexOf('DỆT') !== -1 || loai.indexOf('DET') !== -1) {
@@ -271,6 +272,13 @@ export function updateFilterDropdown() {
         if (val && !seen[val]) { seen[val] = true; values.push(val); }
       }
     });
+    // Fallback: đọc từ dropdown form nhập liệu
+    if (!values.length) {
+      document.querySelectorAll('#nvm-det option, #vtp-det option').forEach(function (opt) {
+        var val = (opt.value || '').trim();
+        if (val && !seen[val]) { seen[val] = true; values.push(val); }
+      });
+    }
   } else if (config.field === 'nhaNhuom') {
     SYNC.ncc.forEach(function (n) {
       var loai = (n.loai || '').toUpperCase();
@@ -279,11 +287,23 @@ export function updateFilterDropdown() {
         if (val && !seen[val]) { seen[val] = true; values.push(val); }
       }
     });
+    if (!values.length) {
+      document.querySelectorAll('#nvm-nhuom option, #vtp-nhuom option').forEach(function (opt) {
+        var val = (opt.value || '').trim();
+        if (val && !seen[val]) { seen[val] = true; values.push(val); }
+      });
+    }
   } else if (config.field === 'khachHang') {
     SYNC.khachHang.forEach(function (kh) {
       var val = (kh.ten || '').trim();
       if (val && !seen[val]) { seen[val] = true; values.push(val); }
     });
+    if (!values.length) {
+      document.querySelectorAll('#xk-kh option').forEach(function (opt) {
+        var val = (opt.value || '').trim();
+        if (val && !seen[val]) { seen[val] = true; values.push(val); }
+      });
+    }
   }
 
   // Bổ sung thêm từ cache (phòng trường hợp có giá trị cũ không nằm trong master data)
