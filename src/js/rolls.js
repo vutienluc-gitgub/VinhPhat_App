@@ -129,6 +129,7 @@ export function renderRolls(type) {
   const giaNhuom = type === 'vtp' ? parseFloat(document.getElementById('vtp-gia-nhuom').value) || 0 : 0;
 
   const filledCount = rolls.filter((r) => parseFloat(r.kg) > 0).length;
+  const pct = rolls.length ? Math.round((filledCount / rolls.length) * 100) : 0;
   const countEl = document.getElementById(`${type}-roll-count`);
   if (countEl)
     countEl.innerHTML =
@@ -137,7 +138,8 @@ export function renderRolls(type) {
       '</span>' +
       '<span style="color:var(--muted)">/' +
       rolls.length +
-      '</span>';
+      '</span>' +
+      '<div class="roll-progress"><div class="roll-progress-bar" style="width:' + pct + '%"></div></div>';
 
   const frag = document.createDocumentFragment();
 
@@ -153,19 +155,19 @@ export function renderRolls(type) {
     let c4 = '';
     if (type === 'nvm') {
       c4 = `<input class="roll-input roll-col4" placeholder="—" value="${r.w || ''}"
-    inputmode="numeric" style="text-align:right;font-size:12px"
+    inputmode="numeric" style="text-align:right;font-size:11px"
     data-roll-w="${i}" data-type="nvm">`;
     } else {
       const price = type === 'xk' ? donGia : giaNhuom;
       c4 = filled
         ? `<div class="roll-col4">${fmtNum(Math.round(kg * price))}</div>`
-        : `<div class="roll-col4" style="color:#e2e8f0">—</div>`;
+        : `<div class="roll-col4" style="color:#e2e8f0">0</div>`;
     }
 
+    // Compact layout: merged dot+num, input, col4, delete
     row.innerHTML =
-      `<div class="roll-num">${num}</div>` +
-      `<div style="display:flex;align-items:center;justify-content:center"><div class="roll-dot"></div></div>` +
-      `<div><input class="roll-input" type="text" inputmode="decimal" placeholder="205"` +
+      `<div class="roll-num"><div class="roll-dot"></div>${num}</div>` +
+      `<div><input class="roll-input" type="text" inputmode="decimal" placeholder="${type === 'nvm' ? '205' : 'kg'}"` +
       ` value="${dispVal}"` +
       ` data-roll-kg="${i}" data-type="${type}"></div>` +
       c4 +
@@ -176,7 +178,32 @@ export function renderRolls(type) {
 
   container.innerHTML = '';
   container.appendChild(frag);
+
+  // Setup scroll-to-top button
+  _setupScrollTop(type, container);
+
   updateSummary(type);
+}
+
+/** Setup floating scroll-to-top for long roll lists */
+function _setupScrollTop(type, container) {
+  const wrap = container.closest('.roll-wrap');
+  if (!wrap) return;
+  let btn = wrap.querySelector('.roll-scroll-top');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.className = 'roll-scroll-top';
+    btn.innerHTML = '↑';
+    btn.title = 'Lên đầu';
+    btn.addEventListener('click', () => {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    wrap.appendChild(btn);
+  }
+  // Show/hide on scroll
+  container.onscroll = () => {
+    btn.classList.toggle('visible', container.scrollTop > 120);
+  };
 }
 
 export function getLotIdForType(type) {

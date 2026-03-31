@@ -383,47 +383,58 @@ select.form-control {
   color: var(--muted);
 }
 
-/* ── ROLL TABLE ── */
-/* ── ROLL TABLE v2 ── */
+/* ── ROLL TABLE v3 — Compact & Fast ── */
 .roll-wrap {
   border: 1.5px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
+  position: relative;
 }
 
 .roll-header {
   display: grid;
-  grid-template-columns: 32px 52px 1fr 88px 24px;
+  grid-template-columns: 40px 1fr 84px 22px;
   gap: 0;
-  padding: 7px 10px;
-  background: var(--navy);
-  font-size: 10px;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+  font-size: 9px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .roll-header span {
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.roll-header span:nth-child(2) {
+  text-align: right;
+  justify-content: flex-end;
 }
 
 .roll-header span:nth-child(3) {
   text-align: right;
-}
-
-.roll-header span:nth-child(4) {
-  text-align: right;
+  justify-content: flex-end;
 }
 
 .roll-body {
-  max-height: 420px;
+  max-height: 480px;
   overflow-y: auto;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 39, 68, 0.15) transparent;
 }
 
 .roll-body::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .roll-body::-webkit-scrollbar-track {
@@ -431,17 +442,23 @@ select.form-control {
 }
 
 .roll-body::-webkit-scrollbar-thumb {
-  background: #dce4ef;
-  border-radius: 2px;
+  background: rgba(15, 39, 68, 0.15);
+  border-radius: 10px;
 }
 
+.roll-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 39, 68, 0.3);
+}
+
+/* ── Roll Row (compact) ── */
 .roll-row {
   display: grid;
-  grid-template-columns: 32px 52px 1fr 88px 24px;
+  grid-template-columns: 40px 1fr 84px 22px;
   gap: 0;
   align-items: center;
-  border-bottom: 1px solid #f0f4f8;
-  transition: background 0.1s;
+  border-bottom: 1px solid rgba(220, 228, 239, 0.5);
+  transition: background 0.08s, border-color 0.08s;
+  min-height: 32px;
 }
 
 .roll-row:last-child {
@@ -449,110 +466,123 @@ select.form-control {
 }
 
 .roll-row:hover {
-  background: #f5f8fd;
+  background: #eef3fa;
 }
 
 .roll-row-filled {
-  background: #f0fbf7;
+  background: linear-gradient(90deg, #edf9f3 0%, #f5fdf9 100%) !important;
+  border-bottom-color: rgba(0, 184, 148, 0.12);
 }
 
 .roll-row-filled:hover {
-  background: #e8f9f4;
+  background: linear-gradient(90deg, #e0f5ec 0%, #ecfbf5 100%) !important;
 }
 
 .roll-row-empty {
   background: var(--card);
 }
 
-/* số thứ tự */
+/* Alternate shading for empty rows */
+.roll-row-empty:nth-child(even) {
+  background: #fafbfd;
+}
+
+/* Number column — integrates dot indicator */
 .roll-num {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #c5cdd8;
+  font-size: 10px;
+  color: #b8c4d0;
   text-align: center;
-  padding: 6px 4px;
+  padding: 4px 2px;
   user-select: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
 }
 
 .roll-row-filled .roll-num {
-  color: #94a3b8;
-  font-weight: 600;
+  color: var(--green);
+  font-weight: 700;
 }
 
-/* badge trạng thái */
+/* Status dot — merged into num column */
 .roll-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #e2e8f0;
-  margin: 0 auto;
-  transition: background 0.15s;
+  background: #dce4ef;
+  flex-shrink: 0;
+  transition: all 0.15s;
 }
 
 .roll-row-filled .roll-dot {
   background: var(--green);
+  box-shadow: 0 0 4px rgba(0, 184, 148, 0.35);
 }
 
-/* input kg */
+/* Input KG — compact */
 .roll-input {
   border: none;
   background: transparent;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--navy);
   text-align: right;
   width: 100%;
   outline: none;
-  padding: 7px 8px;
-  transition: background 0.1s;
+  padding: 5px 8px;
+  transition: all 0.1s;
+  border-radius: 4px;
 }
 
 .roll-input:focus {
-  background: #e8f4fd;
-  border-radius: 6px;
+  background: #dbeafe;
+  box-shadow: inset 0 0 0 1.5px rgba(46, 134, 222, 0.4);
 }
 
 .roll-input::placeholder {
-  color: #d1dae6;
+  color: #cbd5e1;
   font-size: 11px;
   font-weight: 400;
 }
 
 .roll-row-filled .roll-input {
-  color: #0d7a5f;
+  color: #047857;
   font-weight: 700;
 }
 
-/* col4: giá / rộng */
+/* Col4: price/width */
 .roll-col4 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   color: #94a3b8;
   text-align: right;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 
 .roll-row-filled .roll-col4 {
-  color: #00a67e;
+  color: #059669;
   font-weight: 600;
 }
 
-/* nút xóa */
+/* Delete button — invisible until hover */
 .roll-del {
   background: none;
   border: none;
   cursor: pointer;
   color: transparent;
-  font-size: 14px;
-  padding: 4px 6px;
+  font-size: 13px;
+  padding: 2px 4px;
   border-radius: 4px;
-  transition: all 0.15s;
+  transition: all 0.12s;
   line-height: 1;
 }
 
 .roll-row:hover .roll-del {
-  color: #d1dae6;
+  color: #c8d1dc;
 }
 
 .roll-del:hover {
@@ -560,13 +590,13 @@ select.form-control {
   background: #fdecea;
 }
 
-/* thanh controls */
+/* ── Controls Bar (compact) ── */
 .roll-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 10px;
-  background: #f8fafc;
+  gap: 3px;
+  padding: 6px 8px;
+  background: linear-gradient(180deg, #f5f7fa 0%, #edf0f4 100%);
   border-top: 1px solid var(--border);
   overflow-x: auto;
   scrollbar-width: none;
@@ -577,52 +607,63 @@ select.form-control {
 }
 
 .roll-controls-label {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--muted);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  padding: 0 4px;
+  padding: 0 3px;
+  white-space: nowrap;
 }
 
 .rc-btn {
   display: inline-flex;
   align-items: center;
-  padding: 4px 9px;
+  justify-content: center;
+  padding: 3px 8px;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   background: var(--card);
   color: var(--navy);
   font-family: 'JetBrains Mono', monospace;
-  transition: all 0.12s;
+  transition: all 0.1s;
   line-height: 1;
+  min-height: 24px;
 }
 
 .rc-btn:hover {
   background: var(--sky);
   color: #fff;
   border-color: var(--sky);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(46, 134, 222, 0.25);
+}
+
+.rc-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .rc-btn.minus {
-  color: #e74c3c;
-  border-color: #fcc;
+  color: #dc2626;
+  border-color: #fecaca;
 }
 
 .rc-btn.minus:hover {
-  background: #e74c3c;
+  background: #dc2626;
   color: #fff;
-  border-color: #e74c3c;
+  border-color: #dc2626;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
 }
 
 .rc-sep {
   width: 1px;
-  height: 16px;
+  height: 14px;
   background: var(--border);
-  margin: 0 3px;
+  margin: 0 2px;
   flex-shrink: 0;
 }
 
@@ -631,17 +672,50 @@ select.form-control {
   border-color: var(--border);
   margin-left: auto;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0;
+  gap: 3px;
 }
 
 .rc-btn.reset-btn:hover {
   background: #64748b;
   color: #fff;
   border-color: #64748b;
+  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.25);
 }
 
-/* filled input col */
+/* ── Floating scroll-to-top ── */
+.roll-scroll-top {
+  position: absolute;
+  bottom: 44px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(15, 39, 68, 0.3);
+  transition: all 0.15s;
+  opacity: 0.85;
+}
+
+.roll-scroll-top:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.roll-scroll-top.visible {
+  display: flex;
+}
+
+/* ── Legacy compat ── */
 .roll-input-wrap {
   position: relative;
 }
@@ -661,15 +735,12 @@ select.form-control {
   color: #cdd5e0;
 }
 
-.roll-row-filled {
-  background: #f0f9f0 !important;
-}
-
 .roll-row-filled .roll-id {
   color: var(--green);
   font-weight: 600;
 }
 
+/* ── Summary Card ── */
 .roll-summary {
   display: flex;
   gap: 16px;
@@ -696,6 +767,22 @@ select.form-control {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 2px;
+}
+
+/* ── Roll count mini-bar ── */
+.roll-progress {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.roll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), #34d399);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 
 /* ── STATUS BADGE ── */
@@ -1478,17 +1565,26 @@ code {
 
   .roll-header,
   .roll-row {
-    grid-template-columns: 28px 18px minmax(0, 1fr) 72px 28px;
+    grid-template-columns: 34px minmax(0, 1fr) 68px 22px;
   }
 
-  .roll-input,
-  .roll-col4,
-  .roll-num {
-    font-size: 12px;
+  .roll-input {
+    font-size: 13px;
+    padding: 4px 6px;
   }
 
   .roll-col4 {
+    font-size: 10px;
     padding: 0 4px;
+  }
+
+  .roll-num {
+    font-size: 10px;
+  }
+
+  .roll-dot {
+    width: 5px;
+    height: 5px;
   }
 
   .card-header,
@@ -1513,11 +1609,11 @@ code {
   }
 
   .roll-header {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .roll-header,
   .roll-row {
-    grid-template-columns: 24px 16px minmax(0, 1fr) 64px 24px;
+    grid-template-columns: 30px minmax(0, 1fr) 58px 20px;
   }
 }
