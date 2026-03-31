@@ -474,6 +474,10 @@ export function resetForm(type) {
     });
     renderRolls('nvm');
     updateNvmId();
+    setTimeout(function () {
+      var el = document.getElementById('nvm-ngay');
+      if (el) el.focus();
+    }, 100);
   }
   if (type === 'vtp') {
     ['vtp-det', 'vtp-nhuom', 'vtp-hang', 'vtp-xe'].forEach(function (id) {
